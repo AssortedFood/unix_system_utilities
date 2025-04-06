@@ -3,4 +3,3 @@ node_modules/
 venv/
 package-lock.json
 summary.md
-test/
