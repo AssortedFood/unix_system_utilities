@@ -1,21 +1,27 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
-if [ "$#" -ne 1 ]; then
-    echo "❌ Usage: $0 <file-to-copy>"
-    exit 1
-fi
-
 FILE="$1"
 
-if [ ! -f "$FILE" ]; then
-    echo "❌ File not found: $FILE"
-    exit 1
+# Validate
+[[ -f $FILE ]] || { echo "❌ File not found: $FILE"; exit 1; }
+
+# If we have a DISPLAY (and xclip), assume local X session
+if [[ -n "${DISPLAY-}" && -x "$(command -v xclip)" ]]; then
+  xclip -selection clipboard < "$FILE"
+  echo "📋 Copied ‘$FILE’ via xclip"
+  exit 0
 fi
 
-# Read, base64‑encode, strip newlines
-data=$(base64 < "$FILE" | tr -d '\n')
+# On macOS with pbcopy
+if [[ "$(uname)" == "Darwin" && -x "$(command -v pbcopy)" ]]; then
+  pbcopy < "$FILE"
+  echo "📋 Copied ‘$FILE’ via pbcopy"
+  exit 0
+fi
 
-# Send OSC 52 sequence: ESC ] 52 ; c ; <base64-data> BEL
+# Otherwise, try OSC 52
+data=$(base64 < "$FILE" | tr -d '\n')
 printf '\e]52;c;%s\a' "$data"
+echo "📋 Copied ‘$FILE’ via OSC 52"
