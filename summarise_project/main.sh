@@ -60,6 +60,17 @@ for file in "${files[@]}"; do
     echo "" >> "$OUTPUT_FILE"
 done
 
+# Determine the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Point to ../copy_via_osc52/main.sh
+COPY_SCRIPT="$SCRIPT_DIR/../copy_via_osc52/main.sh"
+
+# If it exists, run it against the generated summary
+if [[ -f "$COPY_SCRIPT" ]]; then
+    bash "$COPY_SCRIPT" "$OUTPUT_FILE"
+fi
+
 # Summary
 echo "✅ Processing complete!"
 echo "📂 Total files written to output: $file_count"
