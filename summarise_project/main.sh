@@ -7,7 +7,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 # Define output file
-OUTPUT_FILE="output.txt"
+OUTPUT_FILE="summary.md"
 
 # Clear previous output file if it exists
 > "$OUTPUT_FILE"
@@ -19,11 +19,11 @@ echo "📝 Output will be saved to: $OUTPUT_FILE"
 IGNORE_LIST=("node_modules" ".next" "package-lock.json" "venv")
 
 # Add directory tree structure (excluding specified folders)
-echo "📂 PROJECT DIRECTORY STRUCTURE" >> "$OUTPUT_FILE"
-echo "──────────────────────────────" >> "$OUTPUT_FILE"
-echo "📁 Adding directory tree structure to output file..."
+echo "## 📂 Project Directory Structure" >> "$OUTPUT_FILE"
+echo '```' >> "$OUTPUT_FILE"
 tree -I "$(IFS='|'; echo "${IGNORE_LIST[*]}")" >> "$OUTPUT_FILE"
-echo -e "\n\n" >> "$OUTPUT_FILE"
+echo '```' >> "$OUTPUT_FILE"
+echo "" >> "$OUTPUT_FILE"
 
 # Construct find command dynamically for file extensions
 EXTS=()
@@ -49,11 +49,15 @@ file_count=0
 # Process each file
 for file in "${files[@]}"; do
     ((file_count++))
-    echo "📄 Processing: $file"
-    echo "📄 FILE: $file" >> "$OUTPUT_FILE"
-    echo "──────────────────────────────" >> "$OUTPUT_FILE"
+    # Markdown‑style file header
+    echo "## 📄 ${file#./}" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
+
+    # Fenced code block for the file contents
+    echo '```bash' >> "$OUTPUT_FILE"
     cat "$file" >> "$OUTPUT_FILE"
-    echo -e "\n\n" >> "$OUTPUT_FILE"
+    echo '```' >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
 done
 
 # Summary
