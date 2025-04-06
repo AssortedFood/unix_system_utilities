@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # tests/helpers.bash
 
-# Create a fresh sandbox, copy script & ignore file, and cd into it
+# Create a fresh sandbox, copy script & .summaryignore into it, and cd into it
 setup_project() {
   TMP=$(mktemp -d)
-  cp "${BATS_TEST_DIRNAME}/../main.sh" "$TMP"/main.sh
+  cp "${BATS_TEST_DIRNAME}/../main.sh"      "$TMP"/main.sh
   cp "${BATS_TEST_DIRNAME}/../.summaryignore" "$TMP"/.summaryignore
   chmod +x "$TMP"/main.sh
   cd "$TMP"
@@ -22,7 +22,7 @@ create_file() {
   printf "%s\n" "$content" > "$path"
 }
 
-# Run the summariser via its shebang (so ./main.sh uses absolute bash)
+# Run the summariser via its shebang
 run_summary() {
   run ./main.sh "$@"
 }
@@ -47,40 +47,34 @@ run_without_fd() {
   PATH="" run ./main.sh "$@"
 }
 
-
 # Assert stdout contains a substring
 assert_stdout_contains() {
   [[ "$output" == *"$1"* ]]
 }
 
+# Stub out all clipboard backends so they dump into clipboard.txt
 stub_clipboard() {
   local ROOT="$(pwd)"
 
-  # 1) Fake xclip in PATH
+  # Fake xclip and pbcopy in PATH
   mkdir -p fakebin
-  cat > fakebin/xclip <<EOF
+  for cmd in xclip pbcopy; do
+    cat > fakebin/$cmd <<EOF
 #!/usr/bin/env bash
-# read stdin into clipboard.txt at the test root
+# write stdin to clipboard.txt
 cat > "$ROOT/clipboard.txt"
 EOF
-  chmod +x fakebin/xclip
+    chmod +x fakebin/$cmd
+  done
 
-  # 2) Fake pbcopy in PATH
-  cat > fakebin/pbcopy <<EOF
-#!/usr/bin/env bash
-cat > "$ROOT/clipboard.txt"
-EOF
-  chmod +x fakebin/pbcopy
-
-  # 3) Fake OSC52 helper in ../copy_via_osc52
+  # Fake OSC52 helper in ../copy_via_osc52
   mkdir -p ../copy_via_osc52
   cat > ../copy_via_osc52/main.sh <<EOF
 #!/usr/bin/env bash
-# copy the file argument into clipboard.txt at the test root
+# copy the file argument into clipboard.txt
 cat "\$1" > "$ROOT/clipboard.txt"
 EOF
   chmod +x ../copy_via_osc52/main.sh
 
-  # Prepend our fakebin so xclip/pbcopy are found first
   export PATH="$ROOT/fakebin:$PATH"
 }

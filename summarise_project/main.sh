@@ -2,8 +2,13 @@
 
 # ──────────────────────────────────────────────────────────────────────────────
 # summarise_project: generate a Markdown summary of your project,
-# honouring .summaryignore (gitignore syntax) for both tree and fd.
+# honouring only the .summaryignore in the script directory (gitignore syntax)
+# for both tree and fd.
 # ──────────────────────────────────────────────────────────────────────────────
+
+# 0. Locate script directory (for ignore file)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+IGNORE_FILE="$SCRIPT_DIR/.summaryignore"
 
 # 1. Ensure at least one file extension is provided
 if [ "$#" -eq 0 ]; then
@@ -17,9 +22,9 @@ OUTPUT_FILE="summary.md"
 echo "🚀 Starting script…"
 echo "📝 Output will be saved to: $OUTPUT_FILE"
 
-# 3. Build ignore pattern for tree
-if [[ -f .summaryignore ]]; then
-    TREE_IGNORES=$(grep -vE '^\s*(#|$)' .summaryignore \
+# 3. Build ignore pattern for tree from the script‑dir .summaryignore
+if [[ -f $IGNORE_FILE ]]; then
+    TREE_IGNORES=$(grep -vE '^\s*(#|$)' "$IGNORE_FILE" \
                    | sed 's:/*$::' \
                    | paste -sd '|' -)
 else
@@ -42,7 +47,7 @@ if [[ -z "$FD_BIN" ]]; then
     exit 1
 fi
 
-echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring .summaryignore)"
+echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring $IGNORE_FILE)"
 
 # 5. Build fd args for each extension
 FD_ARGS=()
@@ -50,11 +55,12 @@ for ext in "$@"; do
     FD_ARGS+=( -e "$ext" )
 done
 
-# 6. Use fd to list files
+# 6. Use fd to list files with only .summaryignore (no VCS ignores)
 mapfile -t files < <(
     "$FD_BIN" "${FD_ARGS[@]}" \
       --type f \
-      --ignore-file .summaryignore \
+      --no-ignore-vcs \
+      --ignore-file "$IGNORE_FILE" \
       --color=never
 )
 
@@ -72,11 +78,9 @@ for file in "${files[@]}"; do
     echo "" >> "$OUTPUT_FILE"
 done
 
-# 8. Optionally copy via OSC52 if helper exists in ../copy_via_osc52
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 8. Optionally copy via OSC52 helper
 COPY_SCRIPT="$SCRIPT_DIR/../copy_via_osc52/main.sh"
 if [[ -x "$COPY_SCRIPT" ]]; then
-    # Invoke helper with the summary file as its single argument
     bash "$COPY_SCRIPT" "$OUTPUT_FILE"
 fi
 

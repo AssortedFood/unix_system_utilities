@@ -48,12 +48,11 @@ teardown() {
   mkdir -p node_modules
   create_file node_modules/foo.txt "secret"
   create_file foo.txt "public"
-  > .summaryignore   # empty file
+  > .summaryignore
 
   run_summary txt
   [ "$status" -eq 0 ]
 
-  # Both foo.txt and node_modules/foo.txt should appear
   assert_in_summary "## 📄 \`foo.txt\`"
   assert_in_summary "## 📄 \`node_modules/foo.txt\`"
 }
@@ -112,25 +111,21 @@ teardown() {
   run_summary txt
   [ "$status" -eq 0 ]
 
-  # The old content should be gone, new heading present
   run grep -q "old" summary.md
   [ "$status" -ne 0 ]
   assert_in_summary "## 📄 \`foo.txt\`"
 }
 
 @test "copies summary.md contents into clipboard.txt" {
-  # Arrange
   create_file a.txt "Alpha"
   create_file b.txt "Beta"
-  > .summaryignore     # ignore nothing
+  > .summaryignore
 
-  stub_clipboard       # install fake xclip/pbcopy and OSC52 helper
+  stub_clipboard
 
-  # Act
   run_summary txt
   [ "$status" -eq 0 ]
 
-  # Assert: clipboard.txt exists and exactly matches summary.md
   [ -f clipboard.txt ]
   run diff -u summary.md clipboard.txt
   [ "$status" -eq 0 ]

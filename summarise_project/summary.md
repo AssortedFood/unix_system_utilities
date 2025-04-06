@@ -1,13 +1,24 @@
 ## 📂 Project Directory Structure
 ```
 .
+├── global.summaryignore
 ├── main.sh
+├── summary.md
 └── tests
     ├── helpers.bash
     └── summarise.bats
 
-2 directories, 3 files
+2 directories, 5 files
 ```
+
+## 📄 `global.summaryignore`
+
+```bash
+node_modules/
+.next/
+venv/
+package-lock.json
+summary.md```
 
 ## 📄 `main.sh`
 
@@ -16,8 +27,12 @@
 
 # ──────────────────────────────────────────────────────────────────────────────
 # summarise_project: generate a Markdown summary of your project,
-# honouring .summaryignore (gitignore syntax) for both tree and fd.
+# honouring per‑project (.summaryignore) and global (script_dir/global.summaryignore)
+# ignore files, using gitignore syntax for both tree and fd.
 # ──────────────────────────────────────────────────────────────────────────────
+
+# 0. Locate script directory (for global ignore)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 1. Ensure at least one file extension is provided
 if [ "$#" -eq 0 ]; then
@@ -31,48 +46,75 @@ OUTPUT_FILE="summary.md"
 echo "🚀 Starting script…"
 echo "📝 Output will be saved to: $OUTPUT_FILE"
 
-# 3. Build ignore pattern for tree
-if [[ -f .summaryignore ]]; then
-    TREE_IGNORES=$(grep -vE '^\s*(#|$)' .summaryignore \
-                   | sed 's:/*$::' \
-                   | paste -sd '|' -)
-else
-    TREE_IGNORES="node_modules|.next|venv|dist|build|package-lock.json|.env"
+# 3. Load ignore patterns from both per‑project and global files
+IGNORE_FILE=".summaryignore"
+GLOBAL_IGNORE_FILE="$SCRIPT_DIR/global.summaryignore"
+declare -a IGNORES
+
+# Read project‑local ignore
+if [[ -f $IGNORE_FILE ]]; then
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    IGNORES+=("$line")
+  done < "$IGNORE_FILE"
 fi
 
+# Read global ignore
+if [[ -f $GLOBAL_IGNORE_FILE ]]; then
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    IGNORES+=("$line")
+  done < "$GLOBAL_IGNORE_FILE"
+fi
+
+# If neither file existed or both were empty, fall back to defaults
+if [ "${#IGNORES[@]}" -eq 0 ]; then
+  IGNORES=(node_modules/ .next/ venv/ dist/ build/ package-lock.json .env)
+fi
+
+# 4. Build tree‑ignore regex
+TREE_PATTERNS=()
+for pat in "${IGNORES[@]}"; do
+  TREE_PATTERNS+=( "${pat%/}" )
+done
+TREE_REGEX=$(IFS='|'; echo "${TREE_PATTERNS[*]}")
+
+# 5. Dump project tree
 echo "## 📂 Project Directory Structure" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
-tree -I "$TREE_IGNORES" >> "$OUTPUT_FILE"
+tree -I "$TREE_REGEX" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# 4. Locate fd/fdfind
-FD_BIN=$(command -v fd   \
-         || command -v fdfind \
-         || command -v fd-find \
-         || true)
+# 6. Locate fd/fdfind
+FD_BIN=$(command -v fd || command -v fdfind || command -v fd-find || true)
 if [[ -z "$FD_BIN" ]]; then
     echo "❌ fd (or fdfind / fd-find) not found; please install fd."
     exit 1
 fi
 
-echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring .summaryignore)"
+echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring combined ignore files)"
 
-# 5. Build fd args for each extension
+# 7. Build fd args for each extension
 FD_ARGS=()
 for ext in "$@"; do
     FD_ARGS+=( -e "$ext" )
 done
 
-# 6. Use fd to list files
-mapfile -t files < <(
-    "$FD_BIN" "${FD_ARGS[@]}" \
-      --type f \
-      --ignore-file .summaryignore \
-      --color=never
-)
+# 8. Use fd to list files (honours all IGNORES via --ignore-file for project, but we need to merge
+#     global ignores manually since fd only takes one ignore-file; so write a temp combined ignore)
+COMBINED_IGNORE=$(mktemp)
+printf "%s\n" "${IGNORES[@]}" > "$COMBINED_IGNORE"
 
-# 7. Process and append each file
+mapfile -t files < <(
+  "$FD_BIN" "${FD_ARGS[@]}" \
+    --type f \
+    --ignore-file "$COMBINED_IGNORE" \
+    --color=never
+)
+rm "$COMBINED_IGNORE"
+
+# 9. Process and append each file
 file_count=0
 for file in "${files[@]}"; do
     ((file_count++))
@@ -86,18 +128,21 @@ for file in "${files[@]}"; do
     echo "" >> "$OUTPUT_FILE"
 done
 
-# 8. Optionally copy via OSC52 if helper exists in ../copy_via_osc52
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 10. Optionally copy via OSC52 helper
 COPY_SCRIPT="$SCRIPT_DIR/../copy_via_osc52/main.sh"
 if [[ -x "$COPY_SCRIPT" ]]; then
-    # Invoke helper with the summary file as its single argument
     bash "$COPY_SCRIPT" "$OUTPUT_FILE"
 fi
 
-# 9. Final summary
+# 11. Final summary
 echo "✅ Processing complete!"
 echo "📂 Total files written to summary: $file_count"
 echo "📄 Check the output in: $OUTPUT_FILE"
+```
+
+## 📄 `summary.md`
+
+```bash
 ```
 
 ## 📄 `tests/helpers.bash`
@@ -158,36 +203,36 @@ assert_stdout_contains() {
   [[ "$output" == *"$1"* ]]
 }
 
-# Stub out all clipboard backends so they dump into clipboard.txt
 stub_clipboard() {
+  local ROOT="$(pwd)"
+
   # 1) Fake xclip in PATH
   mkdir -p fakebin
-  cat > fakebin/xclip <<'EOF'
+  cat > fakebin/xclip <<EOF
 #!/usr/bin/env bash
-# read stdin into clipboard.txt
-cat > clipboard.txt
+# read stdin into clipboard.txt at the test root
+cat > "$ROOT/clipboard.txt"
 EOF
   chmod +x fakebin/xclip
 
   # 2) Fake pbcopy in PATH
-  cat > fakebin/pbcopy <<'EOF'
+  cat > fakebin/pbcopy <<EOF
 #!/usr/bin/env bash
-# read stdin into clipboard.txt
-cat > clipboard.txt
+cat > "$ROOT/clipboard.txt"
 EOF
   chmod +x fakebin/pbcopy
 
-  # 3) Fake OSC52 helper in ../copy_via_osc52 (one level up from main.sh)
+  # 3) Fake OSC52 helper in ../copy_via_osc52
   mkdir -p ../copy_via_osc52
-  cat > ../copy_via_osc52/main.sh <<'EOF'
+  cat > ../copy_via_osc52/main.sh <<EOF
 #!/usr/bin/env bash
-# copy the file argument into clipboard.txt
-cat "\$1" > clipboard.txt
+# copy the file argument into clipboard.txt at the test root
+cat "\$1" > "$ROOT/clipboard.txt"
 EOF
   chmod +x ../copy_via_osc52/main.sh
 
   # Prepend our fakebin so xclip/pbcopy are found first
-  export PATH="$(pwd)/fakebin:$PATH"
+  export PATH="$ROOT/fakebin:$PATH"
 }
 ```
 
@@ -320,20 +365,62 @@ teardown() {
   create_file b.txt "Beta"
   > .summaryignore     # ignore nothing
 
-  stub_clipboard      # install fake xclip, pbcopy and OSC52 helper
+  stub_clipboard       # install fake xclip/pbcopy and OSC52 helper
 
   # Act
   run_summary txt
   [ "$status" -eq 0 ]
 
-  # DEBUG (optional): show both files
-  echo "---- summary.md ----";  cat summary.md
-  echo "---- clipboard.txt ----";  cat clipboard.txt
-
-  # Assert: clipboard.txt exists and matches summary.md exactly
+  # Assert: clipboard.txt exists and exactly matches summary.md
   [ -f clipboard.txt ]
   run diff -u summary.md clipboard.txt
   [ "$status" -eq 0 ]
+}
+
+@test "global summaryignore: patterns in global.summaryignore are honoured" {
+  # Arrange
+  mkdir -p node_modules
+  create_file node_modules/foo.txt "secret"
+  create_file foo.txt "public"
+
+  # Local ignore empty (so no per‐project ignores)
+  > .summaryignore
+
+  # Global ignore lives alongside main.sh
+  cat > global.summaryignore <<EOF
+node_modules/
+EOF
+
+  # Act
+  run_summary txt
+  [ "$status" -eq 0 ]
+
+  # Assert: foo.txt is included, node_modules/foo.txt is skipped
+  assert_in_summary    "## 📄 \`foo.txt\`"
+  assert_not_in_summary "## 📄 \`node_modules/foo.txt\`"
+}
+
+@test "local summaryignore overrides global" {
+  # Arrange
+  mkdir -p node_modules
+  create_file node_modules/foo.txt "secret"
+  create_file foo.txt "public"
+
+  # Global ignores node_modules
+  cat > global.summaryignore <<EOF
+node_modules/
+EOF
+
+  # Local ignores foo.txt
+  write_ignore foo.txt
+
+  # Act
+  run_summary txt
+  [ "$status" -eq 0 ]
+
+  # Assert: foo.txt is skipped (local), but node_modules/foo.txt is now included
+  assert_not_in_summary "## 📄 \`foo.txt\`"
+  assert_in_summary     "## 📄 \`node_modules/foo.txt\`"
 }
 ```
 
