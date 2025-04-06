@@ -1,77 +1,99 @@
 #!/bin/bash
 
+# ──────────────────────────────────────────────────────────────────────────────
+# summarise_project: generate a Markdown summary of your project, using .summaryignore
+# ──────────────────────────────────────────────────────────────────────────────
+
 # Ensure at least one file extension is provided
 if [ "$#" -eq 0 ]; then
-    echo "❌ Usage: $0 <ext1> <ext2> ..."
+    echo "❌ Usage: $0 <ext1> <ext2> …"
     exit 1
 fi
 
 # Define output file
 OUTPUT_FILE="summary.md"
 
-# Clear previous output file if it exists
+# Clear previous output
 > "$OUTPUT_FILE"
-
-echo "🚀 Starting script..."
+echo "🚀 Starting script…"
 echo "📝 Output will be saved to: $OUTPUT_FILE"
 
-# List of folders and files to ignore
-IGNORE_LIST=("node_modules" ".next" "package-lock.json" "venv")
+# ──────────────────────────────────────────────────────────────────────────────
+# Build ignore pattern for `tree` from .summaryignore
+# ──────────────────────────────────────────────────────────────────────────────
+if [[ -f .summaryignore ]]; then
+    TREE_IGNORES=$(grep -vE '^\s*(#|$)' .summaryignore \
+                   | sed 's:/*$::' \
+                   | paste -sd '|' -)
+else
+    TREE_IGNORES="node_modules|.next|venv|dist|build|package-lock.json|.env"
+fi
 
-# Add directory tree structure (excluding specified folders)
 echo "## 📂 Project Directory Structure" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
-tree -I "$(IFS='|'; echo "${IGNORE_LIST[*]}")" >> "$OUTPUT_FILE"
+tree -I "$TREE_IGNORES" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# Construct find command dynamically for file extensions
-EXTS=()
+# ──────────────────────────────────────────────────────────────────────────────
+# Locate fd binary (fd, fdfind, or fd-find)
+# ──────────────────────────────────────────────────────────────────────────────
+FD_BIN=$(command -v fd   \
+         || command -v fdfind \
+         || command -v fd-find \
+         || true)
+
+if [[ -z "$FD_BIN" ]]; then
+    echo "❌ fd (or fdfind / fd-find) not found; please install fd."
+    exit 1
+fi
+
+echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring .summaryignore)"
+
+# Build fd args for each extension
+FD_ARGS=()
 for ext in "$@"; do
-    EXTS+=("-name" "*.$ext" -o)
-done
-unset 'EXTS[-1]' # Remove the last "-o"
-
-# Construct the ignore pattern for find
-IGNORE_PATTERN=()
-for ignore in "${IGNORE_LIST[@]}"; do
-    IGNORE_PATTERN+=(! -path "*/$ignore/*") # Ignore directories
-    IGNORE_PATTERN+=(! -name "$ignore")     # Ignore specific files
+    FD_ARGS+=( -e "$ext" )
 done
 
-# Find matching files and store in an array, while excluding ignored directories and files
-echo "🔍 Searching for files with extensions: $* (excluding ${IGNORE_LIST[*]})"
-mapfile -t files < <(find . -type f \( "${EXTS[@]}" \) "${IGNORE_PATTERN[@]}")
+# ──────────────────────────────────────────────────────────────────────────────
+# Use fd to list files with full gitignore‑style semantics
+# ──────────────────────────────────────────────────────────────────────────────
+mapfile -t files < <(
+    "$FD_BIN" "${FD_ARGS[@]}" \
+      --type f \
+      --ignore-file .summaryignore \
+      --color=never
+)
 
-# Counter for processed files
+# ──────────────────────────────────────────────────────────────────────────────
+# Process and append each file
+# ──────────────────────────────────────────────────────────────────────────────
 file_count=0
-
-# Process each file
 for file in "${files[@]}"; do
     ((file_count++))
-    # Markdown‑style file header
-    echo "## 📄 ${file#./}" >> "$OUTPUT_FILE"
-    echo "" >> "$OUTPUT_FILE"
+    echo "📄 Processing: $file"
 
-    # Fenced code block for the file contents
+    echo "## 📄 \`${file#./}\`" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
     echo '```bash' >> "$OUTPUT_FILE"
     cat "$file" >> "$OUTPUT_FILE"
     echo '```' >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
 done
 
-# Determine the directory of this script
+# ──────────────────────────────────────────────────────────────────────────────
+# Optionally copy via OSC52 if helper exists
+# ──────────────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Point to ../copy_via_osc52/main.sh
 COPY_SCRIPT="$SCRIPT_DIR/../copy_via_osc52/main.sh"
-
-# If it exists, run it against the generated summary
-if [[ -f "$COPY_SCRIPT" ]]; then
+if [[ -x "$COPY_SCRIPT" ]]; then
     bash "$COPY_SCRIPT" "$OUTPUT_FILE"
 fi
 
+# ──────────────────────────────────────────────────────────────────────────────
 # Summary
+# ──────────────────────────────────────────────────────────────────────────────
 echo "✅ Processing complete!"
-echo "📂 Total files written to output: $file_count"
+echo "📂 Total files written to summary: $file_count"
 echo "📄 Check the output in: $OUTPUT_FILE"
