@@ -10,10 +10,21 @@ teardown() {
   teardown_project
 }
 
-@test "usage with no arguments" {
-  run ./main.sh
-  [ "$status" -ne 0 ]
-  assert_stdout_contains "Usage:"
+@test "no arguments matches all files" {
+  # prepare two different file‑types
+  create_file foo.txt "TXT"
+  create_file bar.sh  "SH"
+  > .summaryignore
+
+  run_summary
+  [ "$status" -eq 0 ]
+
+  # should warn us that we're matching everything
+  assert_stdout_contains "No extensions specified; matching all files"
+
+  # and it should have picked up *both* foo.txt and bar.sh
+  assert_in_summary "## 📄 \`foo.txt\`"
+  assert_in_summary "## 📄 \`bar.sh\`"
 }
 
 @test "basic functionality includes .txt files" {

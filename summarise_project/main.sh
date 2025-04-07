@@ -10,10 +10,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IGNORE_FILE="$SCRIPT_DIR/.summaryignore"
 
-# 1. Ensure at least one file extension is provided
+# 1. If no extensions provided, we’ll match *all* files
 if [ "$#" -eq 0 ]; then
-    echo "❌ Usage: $0 <ext1> <ext2> …"
-    exit 1
+    echo "🔍 No extensions specified; matching all files"
 fi
 
 # 2. Prepare output
@@ -47,9 +46,14 @@ if [[ -z "$FD_BIN" ]]; then
     exit 1
 fi
 
-echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring $IGNORE_FILE)"
+# 4.5. Show what we’re searching for
+if [ "$#" -eq 0 ]; then
+    echo "🔍 Searching for all files (using $(basename "$FD_BIN"), ignoring $IGNORE_FILE)"
+else
+    echo "🔍 Searching for extensions: $* (using $(basename "$FD_BIN"), ignoring $IGNORE_FILE)"
+fi
 
-# 5. Build fd args for each extension
+# 5. Build fd args for each extension (will be empty if no args)
 FD_ARGS=()
 for ext in "$@"; do
     FD_ARGS+=( -e "$ext" )
