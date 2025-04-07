@@ -2,8 +2,18 @@
 set -euo pipefail
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Colour palette (only if stdout is a TTY)
+# Configuration: map each alias to its script (path is relative to repo root)
 # ──────────────────────────────────────────────────────────────────────────────
+ALIASES=(
+  "copy:copy_via_osc52/main.sh"
+  "sshl:ssh_port_forward/main.sh"
+  "sp:summarise_project/main.sh"
+)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# No need to touch anything below here
+# ──────────────────────────────────────────────────────────────────────────────
+
 if [ -t 1 ]; then
   RED=$(tput setaf 1)
   GREEN=$(tput setaf 2)
@@ -13,18 +23,6 @@ if [ -t 1 ]; then
 else
   RED='' GREEN='' YELLOW='' BLUE='' RESET=''
 fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Configuration: map each alias to its script (path is relative to repo root)
-# ──────────────────────────────────────────────────────────────────────────────
-ALIASES=(
-  "copy:copy_via_osc52/main.sh"
-  "sp:summarise_project/main.sh"
-)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# No need to touch anything below here
-# ──────────────────────────────────────────────────────────────────────────────
 
 # 1. Locate repo root (where this script lives)
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -49,22 +47,19 @@ for mapping in "${ALIASES[@]}"; do
   fi
 done
 
-# 5. Add aliases to ~/.bash_aliases if not already present
-HEADER="# ─── Project aliases for ${REPO_ROOT} ───"
-if ! grep -Fq "$HEADER" "$TARGET"; then
-  {
-    echo
-    echo "$HEADER"
-    for mapping in "${ALIASES[@]}"; do
-      IFS=":" read -r name relpath <<< "$mapping"
-      echo "alias $name=\"$REPO_ROOT/$relpath\""
-    done
-    echo "# ────────────────────────────────────────────────────────────────"
-  } >> "$TARGET"
-  MESSAGES+=( "${GREEN}✔️  Added project aliases to \`$TARGET\`${RESET}" )
-else
-  MESSAGES+=( "${BLUE}ℹ️  Project aliases already present in \`$TARGET\`${RESET}" )
-fi
+# 5. Add any missing aliases to ~/.bash_aliases
+touch "$TARGET"  # ensure the file exists
+
+for mapping in "${ALIASES[@]}"; do
+  IFS=":" read -r name relpath <<< "$mapping"
+  # Check if the alias is already in the file
+  if ! grep -Fq "alias $name=" "$TARGET"; then
+    echo "alias $name=\"$REPO_ROOT/$relpath\"" >> "$TARGET"
+    MESSAGES+=( "${GREEN}✔️  Added alias \`$name\` to \`$TARGET\`${RESET}" )
+  else
+    MESSAGES+=( "${BLUE}ℹ️  Alias \`$name\` already exists in \`$TARGET\`${RESET}" )
+  fi
+done
 
 # 6. Ensure ~/.bash_aliases is sourced from ~/.bashrc
 if ! grep -Fq "if [ -f ~/.bash_aliases ]" "$RC"; then
