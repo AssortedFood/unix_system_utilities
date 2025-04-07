@@ -77,7 +77,7 @@ for file in "${files[@]}"; do
 
     echo "## 📄 \`${file#./}\`" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
-    echo '```' >> "$OUTPUT_FILE"
+    echo '```md' >> "$OUTPUT_FILE"
     cat "$file" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
     echo '```' >> "$OUTPUT_FILE"
