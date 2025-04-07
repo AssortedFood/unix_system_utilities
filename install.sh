@@ -2,6 +2,19 @@
 set -euo pipefail
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Colour palette (only if stdout is a TTY)
+# ──────────────────────────────────────────────────────────────────────────────
+if [ -t 1 ]; then
+  RED=$(tput setaf 1)
+  GREEN=$(tput setaf 2)
+  YELLOW=$(tput setaf 3)
+  BLUE=$(tput setaf 4)
+  RESET=$(tput sgr0)
+else
+  RED='' GREEN='' YELLOW='' BLUE='' RESET=''
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Configuration: map each alias to its script (path is relative to repo root)
 # ──────────────────────────────────────────────────────────────────────────────
 ALIASES=(
@@ -30,9 +43,9 @@ for mapping in "${ALIASES[@]}"; do
   script_path="$REPO_ROOT/$relpath"
   if [[ -f "$script_path" ]]; then
     chmod +x "$script_path"
-    MESSAGES+=( "✔️  Made \`$relpath\` executable" )
+    MESSAGES+=( "${GREEN}✔️  Made \`$relpath\` executable${RESET}" )
   else
-    MESSAGES+=( "⚠️  Script not found: \`$relpath\`" )
+    MESSAGES+=( "${YELLOW}⚠️  Script not found: \`$relpath\`${RESET}" )
   fi
 done
 
@@ -48,9 +61,9 @@ if ! grep -Fq "$HEADER" "$TARGET"; then
     done
     echo "# ────────────────────────────────────────────────────────────────"
   } >> "$TARGET"
-  MESSAGES+=( "✔️  Added project aliases to \`$TARGET\`" )
+  MESSAGES+=( "${GREEN}✔️  Added project aliases to \`$TARGET\`${RESET}" )
 else
-  MESSAGES+=( "ℹ️  Project aliases already present in \`$TARGET\`" )
+  MESSAGES+=( "${BLUE}ℹ️  Project aliases already present in \`$TARGET\`${RESET}" )
 fi
 
 # 6. Ensure ~/.bash_aliases is sourced from ~/.bashrc
@@ -62,9 +75,9 @@ if [ -f ~/.bash_aliases ]; then
   source ~/.bash_aliases
 fi
 EOF
-  MESSAGES+=( "✔️  Ensured \`~/.bash_aliases\` is sourced from \`~/.bashrc\`" )
+  MESSAGES+=( "${GREEN}✔️  Ensured \`~/.bash_aliases\` is sourced from \`$RC\`${RESET}" )
 else
-  MESSAGES+=( "ℹ️  \`~/.bash_aliases\` already sourced in \`~/.bashrc\`" )
+  MESSAGES+=( "${BLUE}ℹ️  \`~/.bash_aliases\` already sourced in \`$RC\`${RESET}" )
 fi
 
 # 7. Source the updated ~/.bashrc so aliases take effect now
@@ -73,6 +86,8 @@ source "$RC"
 
 # 8. Finally, print out all our messages
 for msg in "${MESSAGES[@]}"; do
-  echo -e "$msg"
+  printf "%b\n" "$msg"
 done
-echo -e "🎉  Installation complete! You can now use your new aliases in this shell."
+
+printf "%b\n" "${GREEN}🎉  Installation complete!${RESET}"
+printf "👉  Run %bsource ~/.bashrc%b to activate your new aliases in this shell.\n" "${BLUE}" "${RESET}"
