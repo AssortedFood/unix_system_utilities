@@ -1,4 +1,10 @@
-# 🛠️  Unix System Utilities
+<p align="center">
+  <img src="https://img.shields.io/badge/shell-bash-blue">
+  <img src="https://img.shields.io/badge/status-internal-orange">
+  <img src="https://img.shields.io/badge/repo-private-red">
+</p>
+
+<h1 align="center">Unix System Utilities</h1>
 
 A personal collection of small, pragmatic command-line tools designed to make everyday development smoother, faster, and smarter — especially when working with AI.
 
@@ -6,3 +12,12 @@ Each utility is built around real-world needs: concise scripts, often exposed th
 
 The goal is simple:  
 **Bring clarity, speed, and intelligence to the shell.**
+
+Install the utilities with the following commands:
+
+```bash
+git clone https://github.com/AssortedFood/unix_system_utilities.git
+cd unix_system_utilities/
+bash install.sh
+source ~/.bashrc
+```
