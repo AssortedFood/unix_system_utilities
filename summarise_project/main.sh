@@ -32,7 +32,7 @@ fi
 
 echo "## 📂 Project Directory Structure" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
-tree -I "$TREE_IGNORES" >> "$OUTPUT_FILE"
+tree -a -I "$TREE_IGNORES" >> "$OUTPUT_FILE"
 echo '```' >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
@@ -65,6 +65,7 @@ mapfile -t files < <(
       --type f \
       --no-ignore-vcs \
       --ignore-file "$IGNORE_FILE" \
+      --hidden \
       --color=never
 )
 
