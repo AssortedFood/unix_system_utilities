@@ -79,6 +79,7 @@ for file in "${files[@]}"; do
     echo "" >> "$OUTPUT_FILE"
     echo '```bash' >> "$OUTPUT_FILE"
     cat "$file" >> "$OUTPUT_FILE"
+    echo "" >> "$OUTPUT_FILE"
     echo '```' >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
 done
