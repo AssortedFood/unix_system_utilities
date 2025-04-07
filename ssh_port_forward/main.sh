@@ -9,54 +9,54 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROFILE_FILE="$SCRIPT_DIR/.profiles"
 
 # ————————————————————————————————————————————————————————————————
-# 2. Load profiles (if .profiles exists)
-#    Format:   name=port1 port2 port3
-#    Comments and blank lines are ignored
+# 2. Ensure jq is available
 # ————————————————————————————————————————————————————————————————
-declare -A PROFILES
-if [[ -f "$PROFILE_FILE" ]]; then
-  while IFS='=' read -r key value; do
-    # skip comments or empty lines
-    [[ "$key" =~ ^# ]] && continue
-    [[ -z "$key" ]]   && continue
-    PROFILES["$key"]="$value"
-  done < "$PROFILE_FILE"
-fi
-
-# ————————————————————————————————————————————————————————————————
-# 3. Basic argument check
-#    Need at least: profile|port and host
-# ————————————————————————————————————————————————————————————————
-if [[ "$#" -lt 2 ]]; then
-  echo "Usage: $0 [profile|port1 [port2 …]] host"
-  echo "Example: $0 profile1 onyx"
-  echo "         $0 8888 5432 onyx"
+if ! command -v jq &>/dev/null; then
+  echo "Error: jq is required but not installed." >&2
   exit 1
 fi
 
 # ————————————————————————————————————————————————————————————————
-# 4. Determine ports & host
-#    If first arg matches a profile name, use that list
-#    Otherwise treat all but last arg as ports
+# 3. Basic argument check
 # ————————————————————————————————————————————————————————————————
-if [[ -n "${PROFILES[$1]:-}" ]]; then
-  # profile shorthand
-  ports=(${PROFILES[$1]})
-  host="$2"
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 [profile|port1 [port2 …]] host"
+  exit 1
+fi
+
+first_arg="$1"
+host="${@: -1}"
+
+# ————————————————————————————————————————————————————————————————
+# 4. Load ports from JSON profile or from args
+# ————————————————————————————————————————————————————————————————
+if [[ -f "$PROFILE_FILE" ]] && jq -e "has(\"$first_arg\")" "$PROFILE_FILE" >/dev/null; then
+  profile="$first_arg"
+  mapfile -t ports < <(jq -r ".\"$profile\"[]" "$PROFILE_FILE")
+  # one‑line port echo:
+  echo -n "Using profile '$profile' with ports:"
+  printf ' %s' "${ports[@]}"
+  echo
 else
-  # explicit ports
-  host="${@: -1}"
   ports=("${@:1:$#-1}")
 fi
 
 # ————————————————————————————————————————————————————————————————
-# 5. Build and run the SSH command
+# 5. Build & run SSH
 # ————————————————————————————————————————————————————————————————
-ssh_command="ssh"
-for port in "${ports[@]}"; do
-  ssh_command+=" -L ${port}:localhost:${port}"
+ssh_cmd=(ssh)
+for p in "${ports[@]}"; do
+  if ! [[ $p =~ ^[0-9]+$ ]]; then
+    echo "Error: '$p' is not a valid port." >&2
+    exit 1
+  fi
+  ssh_cmd+=(-L "${p}:localhost:${p}")
 done
-ssh_command+=" ${host}"
+ssh_cmd+=("$host")
 
-echo "Running: $ssh_command ✨"
-eval "$ssh_command"
+# join and echo on one line
+ssh_str=$(printf ' %s' "${ssh_cmd[@]}")
+echo "Running:${ssh_str}"
+
+# exec it
+"${ssh_cmd[@]}"
