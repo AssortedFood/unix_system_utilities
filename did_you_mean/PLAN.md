@@ -78,7 +78,7 @@
 
 1. [ ] **Write Failing Integration Tests**  
    - [x] 1.1. Create `tests/extractor_integration.bats`. **Depends on:** 8.3  
-   - [ ] 1.2. Stub call to `extract_suggestions` with empty input → expect non-zero exit. **Depends on:** 1.1
+   - [x] 1.2. Stub call to `extract_suggestions` with empty input → expect non-zero exit. **Depends on:** 1.1
 
 2. [ ] **Feed Captured Output & Assert Structure**  
    - [ ] 2.1. Generate temp file with SAMPLE_STD + SAMPLE_WS. **Depends on:** 2.2  
