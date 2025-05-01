@@ -69,3 +69,19 @@ EOF
   [ "${PKG[0]}" = "git" ]
   [ "${PKG[1]}" = "coreutils" ]
 }
+
+@test "parse_suggestions preserves duplicate commands for SAMPLE_DUP" {
+  parse_suggestions <<EOF
+$SAMPLE_DUP
+EOF
+  # Expect three suggestions
+  [ "${#IDX[@]}" -eq 3 ]
+  # All commands should be 'ssh'
+  [ "${CMD[0]}" = "ssh" ]
+  [ "${CMD[1]}" = "ssh" ]
+  [ "${CMD[2]}" = "ssh" ]
+  # Packages: dropbear, openssh, openssh
+  [ "${PKG[0]}" = "dropbear" ]
+  [ "${PKG[1]}" = "openssh" ]
+  [ "${PKG[2]}" = "openssh" ]
+}

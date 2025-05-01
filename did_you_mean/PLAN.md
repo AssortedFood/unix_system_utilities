@@ -55,7 +55,7 @@
    - [x] 5.4. Confirm SAMPLE_WS test passes. **Depends on:** 5.3
 
 6. [ ] **Duplicate Command Handling**  
-   - [ ] 6.1. Write test for SAMPLE_DUP expecting both entries preserved. **Depends on:** 2.2, 4.4  
+   - [x] 6.1. Write test for SAMPLE_DUP expecting both entries preserved. **Depends on:** 2.2, 4.4  
    - [ ] 6.2. Decide policy: keep duplicates as separate suggestions. **Depends on:** 6.1  
    - [ ] 6.3. Implement duplicate handler in parser:  
      - [ ] 6.3.1. Detect duplicate command names in `CMD`. **Depends on:** 6.2  
