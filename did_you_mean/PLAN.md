@@ -63,7 +63,7 @@
    - [x] 6.4. Verify SAMPLE_DUP test passes. **Depends on:** 6.3.2
 
 7. [ ] **Missing Package Handling**  
-   - [ ] 7.1. Write test for SAMPLE_NO_PKG expecting `PKG[i]="unknown"`. **Depends on:** 2.2, 4.4  
+   - [x] 7.1. Write test for SAMPLE_NO_PKG expecting `PKG[i]="unknown"`. **Depends on:** 2.2, 4.4  
    - [ ] 7.2. Implement fallback in parser: if package field empty, assign “unknown.” **Depends on:** 7.1  
    - [ ] 7.3. Verify SAMPLE_NO_PKG test passes. **Depends on:** 7.2
 

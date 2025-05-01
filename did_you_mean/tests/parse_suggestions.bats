@@ -85,3 +85,13 @@ EOF
   [ "${PKG[1]}" = "openssh" ]
   [ "${PKG[2]}" = "openssh" ]
 }
+
+@test "parse_suggestions assigns unknown package for SAMPLE_NO_PKG" {
+  parse_suggestions <<EOF
+$SAMPLE_NO_PKG
+EOF
+  # Expect two suggestions with unknown packages
+  [ "${#PKG[@]}" -eq 2 ]
+  [ "${PKG[0]}" = "unknown" ]
+  [ "${PKG[1]}" = "unknown" ]
+}

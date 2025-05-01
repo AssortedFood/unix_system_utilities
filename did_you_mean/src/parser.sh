@@ -30,13 +30,17 @@ parse_suggestions() {
     cmd=$(trim_whitespace "$cmd_raw")
     CMD+=("$cmd")
   done
-  # Extract package names into PKG array
+  # Extract package names into PKG array, defaulting to 'unknown'
   PKG=()
   for line in "${SUGGESTION_LINES[@]}"; do
-    # Capture package name after 'in package'
-    local pkg
+    local pkg_raw pkg
+    if echo "$line" | grep -qE 'in package'; then
+      # Capture package name after 'in package'
+      pkg_raw=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
+    else
+      pkg_raw="unknown"
+    fi
     # Trim whitespace from extracted package
-    pkg_raw=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
     pkg=$(trim_whitespace "$pkg_raw")
     PKG+=("$pkg")
   done
