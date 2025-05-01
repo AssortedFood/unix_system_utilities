@@ -20,6 +20,7 @@ EOF
 
 # Emit array exports
 printf 'export IDX=(%s)\n' "${IDX[*]}"
+printf 'export CMD=(%s)\n' "${CMD[*]}"
 
 # Stub exit (non-zero)
 exit 1
