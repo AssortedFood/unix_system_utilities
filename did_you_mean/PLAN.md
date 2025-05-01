@@ -77,7 +77,7 @@
 ## 3. Suggestion Extractor Prototype
 
 1. [ ] **Write Failing Integration Tests**  
-   - [ ] 1.1. Create `tests/extractor_integration.bats`. **Depends on:** 8.3  
+   - [x] 1.1. Create `tests/extractor_integration.bats`. **Depends on:** 8.3  
    - [ ] 1.2. Stub call to `extract_suggestions` with empty input → expect non-zero exit. **Depends on:** 1.1
 
 2. [ ] **Feed Captured Output & Assert Structure**  
