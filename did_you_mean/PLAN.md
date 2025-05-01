@@ -60,7 +60,7 @@
    - [x] 6.3. Implement duplicate handler in parser:  
      - [x] 6.3.1. Detect duplicate command names in `CMD`. **Depends on:** 6.2  
      - [x] 6.3.2. Allow duplicates by keeping each entry distinct. **Depends on:** 6.3.1  
-   - [ ] 6.4. Verify SAMPLE_DUP test passes. **Depends on:** 6.3.2
+   - [x] 6.4. Verify SAMPLE_DUP test passes. **Depends on:** 6.3.2
 
 7. [ ] **Missing Package Handling**  
    - [ ] 7.1. Write test for SAMPLE_NO_PKG expecting `PKG[i]="unknown"`. **Depends on:** 2.2, 4.4  
