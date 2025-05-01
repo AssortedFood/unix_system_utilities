@@ -22,5 +22,13 @@ parse_suggestions() {
     cmd=$(echo "$line" | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]*([^ ]+).*/\1/')
     CMD+=("$cmd")
   done
+  # Extract package names into PKG array
+  PKG=()
+  for line in "${SUGGESTION_LINES[@]}"; do
+    # Capture package name after 'in package'
+    local pkg
+    pkg=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
+    PKG+=("$pkg")
+  done
   return 0
 }
