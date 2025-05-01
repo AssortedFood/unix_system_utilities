@@ -15,7 +15,7 @@
 
 3. [ ] **Implement Minimal Hook Stub**  
    - [x] 3.1. Create `src/hook.sh` defining `command_not_found_handle()` that writes `"DM_HOOK"` into `/tmp/dm_hook_called`. **Depends on:** 1.4  
-   - [ ] 3.2. Source `src/hook.sh` at top of `tests/hook_detection.bats`. **Depends on:** 3.1, 2.3  
+   - [x] 3.2. Source `src/hook.sh` at top of `tests/hook_detection.bats`. **Depends on:** 3.1, 2.3  
    - [ ] 3.3. Run Bats; confirm sentinel assertion passes. **Depends on:** 2.2, 3.2
 
 4. [ ] **Refactor Hook Setup**  

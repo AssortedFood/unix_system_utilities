@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Source the hook stub to intercept missing commands
+source ../src/hook.sh
+
 # Cleanup sentinel file before each test
 setup() {
   rm -f /tmp/dm_hook_called
