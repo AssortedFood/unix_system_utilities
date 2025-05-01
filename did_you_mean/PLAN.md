@@ -49,7 +49,7 @@
    - [x] 4.4. Source `parser.sh` in tests and confirm basic assertions pass. **Depends on:** 4.3.1, 4.3.2, 4.3.3
 
 5. [ ] **Trim Whitespace Handling**  
-   - [ ] 5.1. Write test for SAMPLE_WS expecting no leading/trailing spaces. **Depends on:** 2.2, 4.4  
+   - [x] 5.1. Write test for SAMPLE_WS expecting no leading/trailing spaces. **Depends on:** 2.2, 4.4  
    - [ ] 5.2. Implement `trim_whitespace()` in `lib/utils.sh`. **Depends on:** 5.1  
    - [ ] 5.3. Integrate `trim_whitespace` into index/command/package extraction. **Depends on:** 5.2  
    - [ ] 5.4. Confirm SAMPLE_WS test passes. **Depends on:** 5.3

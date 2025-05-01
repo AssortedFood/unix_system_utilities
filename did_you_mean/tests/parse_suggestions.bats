@@ -53,3 +53,19 @@ EOF
   [ "${PKG[1]}" = "coreutils" ]
   [ "${PKG[2]}" = "coreutils" ]
 }
+
+@test "parse_suggestions trims whitespace for SAMPLE_WS" {
+  # Invoke parser with SAMPLE_WS input
+  parse_suggestions <<EOF
+$SAMPLE_WS
+EOF
+  # Expect two entries
+  [ "${#IDX[@]}" -eq 2 ]
+  # Expect trimmed values: no leading/trailing spaces
+  [ "${IDX[0]}" = "1" ]
+  [ "${IDX[1]}" = "2" ]
+  [ "${CMD[0]}" = "git" ]
+  [ "${CMD[1]}" = "ls" ]
+  [ "${PKG[0]}" = "git" ]
+  [ "${PKG[1]}" = "coreutils" ]
+}
