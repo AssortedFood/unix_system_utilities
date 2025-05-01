@@ -25,3 +25,11 @@ setup() {
   run extract_suggestions "$BATS_TEST_DIRNAME/input.txt"
   [ "$status" -ne 0 ]
 }
+
+@test "extract_suggestions outputs export IDX, CMD, PKG lines" {
+  run extract_suggestions "$BATS_TEST_DIRNAME/input.txt"
+  # Check for bash array export syntax in output
+  echo "$output" | grep -q '^export IDX=(' || false
+  echo "$output" | grep -q '^export CMD=(' || false
+  echo "$output" | grep -q '^export PKG=(' || false
+}
