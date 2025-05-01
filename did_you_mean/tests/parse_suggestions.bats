@@ -10,3 +10,14 @@ SAMPLE_NO_PKG=$'  1) foobar\n  2) baz'
   run parse_suggestions
   [ "$status" -ne 0 ]
 }
+
+@test "parse_suggestions populates IDX array with correct count for SAMPLE_STD" {
+  # Source parser stub
+  source "$BATS_TEST_DIRNAME/../src/parser.sh" 2>/dev/null || true
+  # Invoke parser with SAMPLE_STD input
+  parse_suggestions <<EOF
+$SAMPLE_STD
+EOF
+  # Expect three indices parsed
+  [ "${#IDX[@]}" -eq 3 ]
+}

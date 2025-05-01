@@ -35,7 +35,7 @@
    - [x] 2.1. Add variables holding SAMPLE_STD, SAMPLE_DUP, SAMPLE_WS, SAMPLE_NO_PKG. **Depends on:** 2.1.1
 
 3. [ ] **Assert Array Population**  
-   - [ ] 3.1. Write test asserting `${#IDX[@]}` equals expected. **Depends on:** 2.2  
+   - [x] 3.1. Write test asserting `${#IDX[@]}` equals expected. **Depends on:** 2.2  
    - [ ] 3.2. Write test asserting `CMD` array matches expected commands. **Depends on:** 3.1  
    - [ ] 3.3. Write test asserting `PKG` array matches expected packages or “unknown”. **Depends on:** 3.1
 
