@@ -6,7 +6,7 @@
    - [x] 1.1. Create test directory if missing (`mkdir -p tests`). **Depends on:** _none_
    - [x] 1.2. Create Bats test file `tests/hook_detection.bats`. **Depends on:** 1.1  
    - [x] 1.3. Add test header and boilerplate to `hook_detection.bats`. **Depends on:** 1.2  
-   - [ ] 1.4. Ensure test runs and fails before any implementation. **Depends on:** 1.2, 1.3
+   - [x] 1.4. Ensure test runs and fails before any implementation. **Depends on:** 1.2, 1.3
 
 2. [ ] **Simulate Fake Command & Sentinel Assertion**  
    - [ ] 2.1. In the test, run `foo123` and redirect stderr. **Depends on:** 1.4  
