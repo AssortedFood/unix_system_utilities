@@ -40,7 +40,7 @@
    - [x] 3.3. Write test asserting `PKG` array matches expected packages or “unknown”. **Depends on:** 3.1
 
 4. [ ] **Implement Basic Parser Function**  
-   - [ ] 4.1. Create `src/parser.sh` with stub `parse_suggestions()`. **Depends on:** 2.2  
+   - [x] 4.1. Create `src/parser.sh` with stub `parse_suggestions()`. **Depends on:** 2.2  
    - [ ] 4.2. Grep lines matching `^\s*[0-9]+\)` in the stub. **Depends on:** 4.1  
    - [ ] 4.3. Populate `IDX`, `CMD`, `PKG` arrays in stages:  
      - [ ] 4.3.1. Extract indices into `IDX`. **Depends on:** 4.2  
