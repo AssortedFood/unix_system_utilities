@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# extract_suggestions: read input (file or STDIN) and invoke parser
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/src/parser.sh"
+
+# Read input: file if first arg is valid file
+if [ "$#" -ge 1 ] && [ -f "$1" ]; then
+  input="$(cat "$1")"
+else
+  # No file or invalid path: no-op here
+  input=""
+fi
+
+# Pass captured input to parser (to be implemented further)
+parse_suggestions <<EOF
+$input
+EOF
+
+# Stub exit (non-zero)
+exit 1
