@@ -14,5 +14,13 @@ parse_suggestions() {
     num=$(echo "$line" | sed -E 's/^[[:space:]]*([0-9]+)\).*/\1/')
     IDX+=("$num")
   done
+  # Extract command names into CMD array
+  CMD=()
+  for line in "${SUGGESTION_LINES[@]}"; do
+    # Capture the command following the index
+    local cmd
+    cmd=$(echo "$line" | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]*([^ ]+).*/\1/')
+    CMD+=("$cmd")
+  done
   return 0
 }
