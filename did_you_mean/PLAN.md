@@ -82,7 +82,7 @@
 
 2. [ ] **Feed Captured Output & Assert Structure**  
    - [x] 2.1. Generate temp file with SAMPLE_STD + SAMPLE_WS. **Depends on:** 2.2  
-   - [ ] 2.2. In test, call `extract_suggestions temp.txt`. **Depends on:** 1.2  
+   - [x] 2.2. In test, call `extract_suggestions temp.txt`. **Depends on:** 1.2  
    - [ ] 2.3. Assert output contains valid `export IDX=(…)` lines. **Depends on:** 2.2
 
 3. [ ] **Implement Extraction Logic**  

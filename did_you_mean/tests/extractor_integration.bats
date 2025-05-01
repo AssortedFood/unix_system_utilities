@@ -20,3 +20,8 @@ setup() {
   # The combined file should exist and not be empty
   [ -s "$BATS_TEST_DIRNAME/input.txt" ]
 }
+
+@test "extract_suggestions with file input returns non-zero" {
+  run extract_suggestions "$BATS_TEST_DIRNAME/input.txt"
+  [ "$status" -ne 0 ]
+}
