@@ -9,7 +9,7 @@
    - [x] 1.4. Ensure test runs and fails before any implementation. **Depends on:** 1.2, 1.3
 
 2. [ ] **Simulate Fake Command & Sentinel Assertion**  
-   - [ ] 2.1. In the test, run `foo123` and redirect stderr. **Depends on:** 1.4  
+   - [x] 2.1. In the test, run `foo123` and redirect stderr. **Depends on:** 1.4  
    - [ ] 2.2. Add assertion that `/tmp/dm_hook_called` file exists. **Depends on:** 2.1  
    - [ ] 2.3. Add cleanup step in `setup()` to remove `/tmp/dm_hook_called`. **Depends on:** 2.1
 
