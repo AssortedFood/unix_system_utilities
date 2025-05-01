@@ -1,7 +1,11 @@
 #!/usr/bin/env bats
 
 # Source the hook stub to intercept missing commands
-source ../src/hook.sh
+if [ -n "$BATS_TEST_DIRNAME" ]; then
+  source "$BATS_TEST_DIRNAME/../src/hook.sh"
+else
+  source src/hook.sh
+fi
 
 # Cleanup sentinel file before each test
 setup() {
