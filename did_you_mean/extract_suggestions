@@ -18,5 +18,8 @@ parse_suggestions <<EOF
 $input
 EOF
 
+# Emit array exports
+printf 'export IDX=(%s)\n' "${IDX[*]}"
+
 # Stub exit (non-zero)
 exit 1

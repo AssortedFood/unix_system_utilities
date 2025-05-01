@@ -91,7 +91,7 @@
      - [x] 3.1.2. Otherwise, read from STDIN. **Depends on:** 3.1.1  
    - [x] 3.2. Source `src/parser.sh` and call `parse_suggestions()`. **Depends on:** 4.4  
    - [ ] 3.3. Emit arrays:  
-     - [ ] 3.3.1. `export IDX=(…)`. **Depends on:** 3.2  
+     - [x] 3.3.1. `export IDX=(…)`. **Depends on:** 3.2  
      - [ ] 3.3.2. `export CMD=(…)`. **Depends on:** 3.2  
      - [ ] 3.3.3. `export PKG=(…)`. **Depends on:** 3.2
 
