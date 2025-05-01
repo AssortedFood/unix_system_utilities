@@ -10,7 +10,7 @@
 
 2. [ ] **Simulate Fake Command & Sentinel Assertion**  
    - [x] 2.1. In the test, run `foo123` and redirect stderr. **Depends on:** 1.4  
-   - [ ] 2.2. Add assertion that `/tmp/dm_hook_called` file exists. **Depends on:** 2.1  
+   - [x] 2.2. Add assertion that `/tmp/dm_hook_called` file exists. **Depends on:** 2.1  
    - [ ] 2.3. Add cleanup step in `setup()` to remove `/tmp/dm_hook_called`. **Depends on:** 2.1
 
 3. [ ] **Implement Minimal Hook Stub**  
