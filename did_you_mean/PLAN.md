@@ -29,7 +29,7 @@
 
 1. [ ] **Write Failing Unit Tests for Parser**  
    - [x] 1.1. Create `tests/parse_suggestions.bats` with boilerplate. **Depends on:** 1.4 (from section 1)  
-   - [ ] 1.2. Stub call to `parse_suggestions()` and assert failure. **Depends on:** 1.1
+   - [x] 1.2. Stub call to `parse_suggestions()` and assert failure. **Depends on:** 1.1
 
 2. [ ] **Define Sample Outputs**  
    - [ ] 2.1. Add variables holding SAMPLE_STD, SAMPLE_DUP, SAMPLE_WS, SAMPLE_NO_PKG. **Depends on:** 2.1.1

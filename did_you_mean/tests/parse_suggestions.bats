@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
-# Boilerplate for parse_suggestions tests
-@test "parse_suggestions test stub" {
-  # TODO: implement parse_suggestions invocation and assertions
-  false
+@test "parse_suggestions function invocation fails" {
+  run parse_suggestions
+  [ "$status" -ne 0 ]
 }
