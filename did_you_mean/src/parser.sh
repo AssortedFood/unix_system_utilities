@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Source utility functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/utils.sh"
+
 # Stub parser for dm suggestions
 parse_suggestions() {
   # Filter input lines matching suggestion pattern
@@ -11,7 +15,9 @@ parse_suggestions() {
   for line in "${SUGGESTION_LINES[@]}"; do
     # Capture leading number before the closing parenthesis
     local num
-    num=$(echo "$line" | sed -E 's/^[[:space:]]*([0-9]+)\).*/\1/')
+    # Trim whitespace from extracted index
+    num_raw=$(echo "$line" | sed -E 's/^[[:space:]]*([0-9]+)\).*/\1/')
+    num=$(trim_whitespace "$num_raw")
     IDX+=("$num")
   done
   # Extract command names into CMD array
@@ -19,7 +25,9 @@ parse_suggestions() {
   for line in "${SUGGESTION_LINES[@]}"; do
     # Capture the command following the index
     local cmd
-    cmd=$(echo "$line" | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]*([^ ]+).*/\1/')
+    # Trim whitespace from extracted command
+    cmd_raw=$(echo "$line" | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]*([^ ]+).*/\1/')
+    cmd=$(trim_whitespace "$cmd_raw")
     CMD+=("$cmd")
   done
   # Extract package names into PKG array
@@ -27,7 +35,9 @@ parse_suggestions() {
   for line in "${SUGGESTION_LINES[@]}"; do
     # Capture package name after 'in package'
     local pkg
-    pkg=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
+    # Trim whitespace from extracted package
+    pkg_raw=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
+    pkg=$(trim_whitespace "$pkg_raw")
     PKG+=("$pkg")
   done
   return 0
