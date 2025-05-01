@@ -1,14 +1,20 @@
 #!/usr/bin/env bats
-
+# Source the parser stub for tests
+if [ -n "$BATS_TEST_DIRNAME" ]; then
+  source "$BATS_TEST_DIRNAME/../src/parser.sh"
+else
+  source src/parser.sh
+fi
 # Sample suggestion output fixtures
 SAMPLE_STD=$'  1) git in package git\n  2) ls in package coreutils\n  3) cat in package coreutils'
 SAMPLE_DUP=$'  1) ssh in package dropbear\n  2) ssh in package openssh\n  3) ssh in package openssh'
 SAMPLE_WS=$'  1)   git    in package   git   \n  2)  ls  in package    coreutils   '
 SAMPLE_NO_PKG=$'  1) foobar\n  2) baz'
 
-@test "parse_suggestions function invocation fails" {
+@test "parse_suggestions returns success status" {
+  # Calling without input should still succeed
   run parse_suggestions
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 0 ]
 }
 
 @test "parse_suggestions populates IDX array with correct count for SAMPLE_STD" {

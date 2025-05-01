@@ -46,7 +46,7 @@
      - [x] 4.3.1. Extract indices into `IDX`. **Depends on:** 4.2  
      - [x] 4.3.2. Extract command names into `CMD`. **Depends on:** 4.2  
      - [x] 4.3.3. Extract package names into `PKG`. **Depends on:** 4.2  
-   - [ ] 4.4. Source `parser.sh` in tests and confirm basic assertions pass. **Depends on:** 4.3.1, 4.3.2, 4.3.3
+   - [x] 4.4. Source `parser.sh` in tests and confirm basic assertions pass. **Depends on:** 4.3.1, 4.3.2, 4.3.3
 
 5. [ ] **Trim Whitespace Handling**  
    - [ ] 5.1. Write test for SAMPLE_WS expecting no leading/trailing spaces. **Depends on:** 2.2, 4.4  
