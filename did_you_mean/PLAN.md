@@ -64,7 +64,7 @@
 
 7. [ ] **Missing Package Handling**  
    - [x] 7.1. Write test for SAMPLE_NO_PKG expecting `PKG[i]="unknown"`. **Depends on:** 2.2, 4.4  
-   - [ ] 7.2. Implement fallback in parser: if package field empty, assign “unknown.” **Depends on:** 7.1  
+   - [x] 7.2. Implement fallback in parser: if package field empty, assign “unknown.” **Depends on:** 7.1  
    - [ ] 7.3. Verify SAMPLE_NO_PKG test passes. **Depends on:** 7.2
 
 8. [ ] **Refactor & Verify**  
