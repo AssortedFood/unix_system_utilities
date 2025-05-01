@@ -28,7 +28,7 @@
 ## 2. Suggestion Parsing
 
 1. [ ] **Write Failing Unit Tests for Parser**  
-   - [ ] 1.1. Create `tests/parse_suggestions.bats` with boilerplate. **Depends on:** 1.4 (from section 1)  
+   - [x] 1.1. Create `tests/parse_suggestions.bats` with boilerplate. **Depends on:** 1.4 (from section 1)  
    - [ ] 1.2. Stub call to `parse_suggestions()` and assert failure. **Depends on:** 1.1
 
 2. [ ] **Define Sample Outputs**  
