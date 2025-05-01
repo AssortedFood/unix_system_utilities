@@ -93,10 +93,10 @@
    - [ ] 3.3. Emit arrays:  
      - [x] 3.3.1. `export IDX=(…)`. **Depends on:** 3.2  
      - [x] 3.3.2. `export CMD=(…)`. **Depends on:** 3.2  
-     - [ ] 3.3.3. `export PKG=(…)`. **Depends on:** 3.2
+     - [x] 3.3.3. `export PKG=(…)`. **Depends on:** 3.2
 
 4. [ ] **Decide Data Format**  
-   - [ ] 4.1. Check for `jq` availability in Termux. **Depends on:** 1.4  
+   - [x] 4.1. Check for `jq` availability in Termux. **Depends on:** 1.4  
    - [ ] 4.2. Choose Bash-array format for minimal dependencies. **Depends on:** 4.1  
    - [ ] 4.3. Document choice in `docs/format.md`. **Depends on:** 4.2
 

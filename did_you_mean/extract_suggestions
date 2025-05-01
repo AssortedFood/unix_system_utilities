@@ -2,7 +2,15 @@
 
 # extract_suggestions: read input (file or STDIN) and invoke parser
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Source parser for suggestion parsing
 source "${SCRIPT_DIR}/src/parser.sh"
+
+# Decide data format: prefer jq if available
+if command -v jq >/dev/null 2>&1; then
+  USE_JQ=1
+else
+  USE_JQ=0
+fi
 
 # Read input: file if first arg is valid file
 if [ "$#" -ge 1 ] && [ -f "$1" ]; then
@@ -21,6 +29,7 @@ EOF
 # Emit array exports
 printf 'export IDX=(%s)\n' "${IDX[*]}"
 printf 'export CMD=(%s)\n' "${CMD[*]}"
+printf 'export PKG=(%s)\n' "${PKG[*]}"
 
 # Stub exit (non-zero)
 exit 1
