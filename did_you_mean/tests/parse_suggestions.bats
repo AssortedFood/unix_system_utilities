@@ -21,3 +21,16 @@ EOF
   # Expect three indices parsed
   [ "${#IDX[@]}" -eq 3 ]
 }
+
+@test "parse_suggestions populates CMD array with correct commands for SAMPLE_STD" {
+  # Source parser stub
+  source "$BATS_TEST_DIRNAME/../src/parser.sh" 2>/dev/null || true
+  # Invoke parser with SAMPLE_STD
+  parse_suggestions <<EOF
+$SAMPLE_STD
+EOF
+  # Expect commands: git, ls, cat
+  [ "${CMD[0]}" = "git" ]
+  [ "${CMD[1]}" = "ls" ]
+  [ "${CMD[2]}" = "cat" ]
+}
