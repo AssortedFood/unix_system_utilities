@@ -67,10 +67,10 @@
    - [x] 7.2. Implement fallback in parser: if package field empty, assign “unknown.” **Depends on:** 7.1  
    - [x] 7.3. Verify SAMPLE_NO_PKG test passes. **Depends on:** 7.2
 
-8. [ ] **Refactor & Verify**  
-   - [ ] 8.1. Move trimming & duplicate helpers to `lib/utils.sh`. **Depends on:** 5.2, 6.3.2  
-   - [ ] 8.2. Ensure `parser.sh` sources `utils.sh`. **Depends on:** 8.1  
-   - [ ] 8.3. Run all parser tests; confirm green. **Depends on:** 8.2
+8. [x] **Refactor & Verify**  
+   - [x] 8.1. Move trimming & duplicate helpers to `lib/utils.sh`. **Depends on:** 5.2, 6.3.2  
+   - [x] 8.2. Ensure `parser.sh` sources `utils.sh`. **Depends on:** 8.1  
+   - [x] 8.3. Run all parser tests; confirm green. **Depends on:** 8.2
 
 ---
 
