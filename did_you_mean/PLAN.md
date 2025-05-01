@@ -20,7 +20,7 @@
 
 4. [ ] **Refactor Hook Setup**  
    - [x] 4.1. Ensure all hook logic lives in `src/hook.sh`. **Depends on:** 3.1  
-   - [ ] 4.2. Update `dm.sh` and `install.sh` to `source src/hook.sh`. **Depends on:** 4.1  
+   - [x] 4.2. Update `dm.sh` and `install.sh` to `source src/hook.sh`. **Depends on:** 4.1  
    - [ ] 4.3. Re-run hook tests to confirm no regressions. **Depends on:** 4.2, 3.3
 
 ---
