@@ -34,3 +34,16 @@ EOF
   [ "${CMD[1]}" = "ls" ]
   [ "${CMD[2]}" = "cat" ]
 }
+ 
+@test "parse_suggestions populates PKG array with correct packages for SAMPLE_STD" {
+  # Source parser stub
+  source "$BATS_TEST_DIRNAME/../src/parser.sh" 2>/dev/null || true
+  # Invoke parser with SAMPLE_STD
+  parse_suggestions <<EOF
+$SAMPLE_STD
+EOF
+  # Expect packages: git, coreutils, coreutils
+  [ "${PKG[0]}" = "git" ]
+  [ "${PKG[1]}" = "coreutils" ]
+  [ "${PKG[2]}" = "coreutils" ]
+}

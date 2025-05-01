@@ -37,7 +37,7 @@
 3. [ ] **Assert Array Population**  
    - [x] 3.1. Write test asserting `${#IDX[@]}` equals expected. **Depends on:** 2.2  
    - [x] 3.2. Write test asserting `CMD` array matches expected commands. **Depends on:** 3.1  
-   - [ ] 3.3. Write test asserting `PKG` array matches expected packages or “unknown”. **Depends on:** 3.1
+   - [x] 3.3. Write test asserting `PKG` array matches expected packages or “unknown”. **Depends on:** 3.1
 
 4. [ ] **Implement Basic Parser Function**  
    - [ ] 4.1. Create `src/parser.sh` with stub `parse_suggestions()`. **Depends on:** 2.2  
