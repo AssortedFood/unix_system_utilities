@@ -26,10 +26,24 @@ parse_suggestions <<EOF
 $input
 EOF
 
-# Emit array exports
-printf 'export IDX=(%s)\n' "${IDX[*]}"
-printf 'export CMD=(%s)\n' "${CMD[*]}"
-printf 'export PKG=(%s)\n' "${PKG[*]}"
+# Output JSON if jq is available
+if [ "$USE_JQ" -eq 1 ]; then
+  # Load JSON helper
+  source "${SCRIPT_DIR}/src/json.sh"
+  # Emit single JSON object with arrays
+  printf '{"IDX":%s,"CMD":%s,"PKG":%s}\n' \
+    "$(to_json_array "${IDX[@]}")" \
+    "$(to_json_array "${CMD[@]}")" \
+    "$(to_json_array "${PKG[@]}")"
+  exit 0
+fi
+
+# Emit array exports in Bash-array format if jq unavailable
+if [ "$USE_JQ" -eq 0 ]; then
+  printf 'export IDX=(%s)\n' "${IDX[*]}"
+  printf 'export CMD=(%s)\n' "${CMD[*]}"
+  printf 'export PKG=(%s)\n' "${PKG[*]}"
+fi
 
 # Stub exit (non-zero)
 exit 1

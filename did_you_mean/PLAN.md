@@ -97,8 +97,8 @@
 
 4. [ ] **Decide Data Format**  
    - [x] 4.1. Check for `jq` availability in Termux. **Depends on:** 1.4  
-   - [ ] 4.2. Choose Bash-array format for minimal dependencies. **Depends on:** 4.1  
-   - [ ] 4.3. Document choice in `docs/format.md`. **Depends on:** 4.2
+   - [x] 4.2. Choose Bash-array format for minimal dependencies. **Depends on:** 4.1  
+   - [x] 4.3. Document choice in `docs/format.md`. **Depends on:** 4.2
 
 5. [ ] **JSON Serializer (if chosen)**  
    - [ ] 5.1. Write `src/json.sh` with `to_json_array()`. **Depends on:** 4.2  
