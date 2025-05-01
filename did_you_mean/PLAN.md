@@ -56,7 +56,7 @@
 
 6. [ ] **Duplicate Command Handling**  
    - [x] 6.1. Write test for SAMPLE_DUP expecting both entries preserved. **Depends on:** 2.2, 4.4  
-   - [ ] 6.2. Decide policy: keep duplicates as separate suggestions. **Depends on:** 6.1  
+   - [x] 6.2. Decide policy: keep duplicates as separate suggestions. **Depends on:** 6.1  
    - [ ] 6.3. Implement duplicate handler in parser:  
      - [ ] 6.3.1. Detect duplicate command names in `CMD`. **Depends on:** 6.2  
      - [ ] 6.3.2. Allow duplicates by keeping each entry distinct. **Depends on:** 6.3.1  
