@@ -19,6 +19,16 @@ if [[ "$(uname)" == "Darwin" && -x "$(command -v pbcopy)" ]]; then
   exit 0
 fi
 
-# 3. Fallback: OSC52 escape
+# 3. Fallback: OSC52 escape (with tmux/screen support)
+is_tmux() {
+  [[ -n "${TMUX-}" ]] || [[ "${TERM-}" == screen* ]]
+}
+
 data=$(base64 < "$FILE" | tr -d '\n')
-printf '\e]52;c;%s\a' "$data"
+
+if is_tmux; then
+  # Wrap in DCS passthrough for tmux/screen (escape must be doubled)
+  printf '\ePtmux;\e\e]52;c;%s\a\e\\' "$data"
+else
+  printf '\e]52;c;%s\a' "$data"
+fi
