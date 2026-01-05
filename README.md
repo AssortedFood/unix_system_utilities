@@ -21,3 +21,13 @@ cd unix_system_utilities/
 bash install.sh
 source ~/.bashrc
 ```
+
+## Notes
+
+### copy_via_osc52
+
+For clipboard copy to work inside tmux (3.3a+), add to your `~/.tmux.conf`:
+
+```
+set -g allow-passthrough on
+```
