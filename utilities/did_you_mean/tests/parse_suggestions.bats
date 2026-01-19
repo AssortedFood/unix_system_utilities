@@ -13,7 +13,7 @@ SAMPLE_NO_PKG=$'  1) foobar\n  2) baz'
 
 @test "parse_suggestions returns success status" {
   # Calling without input should still succeed
-  run parse_suggestions
+  run parse_suggestions < /dev/null
   [ "$status" -eq 0 ]
 }
 
