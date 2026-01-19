@@ -22,15 +22,8 @@ unix_system_utilities/
 
 ## When Working Here
 
-1. Read `project_context.md` first - has current status
+1. Read `project_context.md` for current repo state and architecture
 2. Follow patterns in existing utilities (summarise_project is a good reference)
-
-## Before Push/PR
-
-Update `project_context.md` with:
-- What changed
-- Current status of in-progress work
-- Any new decisions
 
 ## Plans
 
