@@ -310,6 +310,9 @@ do_install() {
   # Install to bashrc
   install_to_bashrc
 
+  # Source bashrc to activate aliases in this shell
+  source "$RC"
+
   echo ""
   log_success "Installation complete!"
   echo ""
