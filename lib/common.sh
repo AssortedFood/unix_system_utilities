@@ -31,7 +31,7 @@ log_error() {
 
 # Platform detection
 is_wsl() {
-  rg -qi Microsoft /proc/version 2>/dev/null
+  grep -qi Microsoft /proc/version 2>/dev/null
 }
 
 is_termux() {
