@@ -9,7 +9,7 @@ A personal collection of lightweight Bash utilities for developer workflows.
 ```
 unix_system_utilities/
 ├── .agent/           # AI instructions, plans
-├── install.sh        # Interactive installer
+├── install.sh        # Installer (default: install-all)
 ├── lib/
 │   └── common.sh     # Shared functions (colors, logging)
 └── utilities/

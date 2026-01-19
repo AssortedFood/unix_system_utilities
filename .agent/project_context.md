@@ -16,7 +16,7 @@
 | worktree_remove | `rwt` | Complete - remove git worktrees with safety checks + dynamic completions |
 | prompt | (sourced) | Complete - custom bash prompt with git integration |
 | wsl_bridge | `wsl-bridge` | Complete - WSL2 port forwarding (WSL only) |
-| tmux_config | `tmux-setup` | Complete - install tmux and symlink config |
+| tmux_config | `tmux-setup` | Complete - install tmux and copy config |
 
 ### In Development
 | Utility | Status | Notes |
@@ -28,7 +28,7 @@
 ```
 unix_system_utilities/
 ├── .agent/                       # AI instructions and plans
-├── install.sh                    # Interactive installer (sources lib/common.sh)
+├── install.sh                    # Installer (default: install-all, --select for interactive)
 ├── lib/
 │   └── common.sh                 # Shared functions (colors, logging, platform detection)
 └── utilities/
@@ -36,18 +36,22 @@ unix_system_utilities/
     ├── ssh_port_forward/
     │   └── deps.sh               # jq
     ├── summarise_project/
-    │   └── deps.sh               # fd, tree
+    │   └── deps.sh               # fd, tree, rg
     ├── did_you_mean/             # Termux only
+    │   └── deps.sh               # rg
     ├── worktree_add/
     │   └── tests/
     ├── worktree_remove/
     │   ├── completions.sh        # Dynamic autocomplete
+    │   ├── deps.sh               # rg
     │   └── tests/
     ├── prompt/                   # Sourced, not aliased
+    │   └── deps.sh               # rg
     ├── wsl_bridge/               # WSL only
-    │   ├── deps.sh               # jq
+    │   ├── deps.sh               # jq, rg
     │   └── update-portproxy.ps1
     └── tmux_config/
+        ├── deps.sh               # tmux
         └── .tmux.conf
 ```
 
