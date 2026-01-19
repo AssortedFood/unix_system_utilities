@@ -12,8 +12,7 @@ unix_system_utilities/
 ├── install.sh                    # Enhanced interactive installer
 ├── README.md
 ├── lib/
-│   ├── common.sh                 # Shared functions (colors, logging)
-│   └── deps.sh                   # Aggregates deps from utilities, dedupes, installs
+│   └── common.sh                 # Shared functions (colors, logging)
 └── utilities/
     ├── copy_via_osc52/
     │   └── main.sh
@@ -267,11 +266,28 @@ wsl_bridge/
    - No UAC prompt (task is pre-authorized)
 
 3. **PowerShell script** (`update-portproxy.ps1`):
-   - Reads config.json
-   - Clears existing port forwarding rules
-   - Adds new rules for each port
+   ```powershell
+   $configPath = "$env:USERPROFILE\.wsl-bridge\config.json"
+   $config = Get-Content $configPath | ConvertFrom-Json
 
-4. **Fallback**: If scheduled task doesn't exist, prompts user to run `--setup` first
+   # Clear existing rules for managed ports
+   foreach ($port in $config.ports) {
+       netsh interface portproxy delete v4tov4 listenport=$port listenaddress=0.0.0.0 2>$null
+   }
+
+   # Add new rules
+   foreach ($port in $config.ports) {
+       netsh interface portproxy add v4tov4 listenport=$port listenaddress=0.0.0.0 connectport=$port connectaddress=$($config.ip)
+   }
+   ```
+
+4. **Setup creates task** (`--setup`):
+   ```bash
+   # From WSL, create the scheduled task:
+   powershell.exe -Command "schtasks /Create /TN 'WSL-PortForward' /TR 'powershell.exe -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.wsl-bridge\\update-portproxy.ps1\"' /SC ONCE /ST 00:00 /RL HIGHEST /F"
+   ```
+
+5. **Fallback**: If scheduled task doesn't exist, prompts user to run `--setup` first
 
 ### 5. tmux_config
 
@@ -288,6 +304,8 @@ wsl_bridge/
 ## Enhanced install.sh
 
 ### Interactive Selection
+
+**Note:** Interactive UI should be implemented last. Work iteratively with human user for feedback on UX. Start with simple numbered list if time-constrained; fancy arrow-key selection can come later.
 
 Example (on WSL):
 ```
@@ -307,8 +325,32 @@ Platform-specific utilities only shown when applicable:
 
 ### Dependency Management
 
-Install.sh sources `deps.sh` from each selected utility, aggregates missing deps, and offers:
-- `y` = Install all
+Aggregation logic lives in `install.sh` (no separate lib/deps.sh):
+
+```bash
+# Aggregate deps from selected utilities
+declare -A ALL_DEPS=()
+
+for util in "${SELECTED_UTILS[@]}"; do
+  deps_file="utilities/$util/deps.sh"
+  if [[ -f "$deps_file" ]]; then
+    source "$deps_file"  # sources DEPS associative array
+    for cmd in "${!DEPS[@]}"; do
+      ALL_DEPS[$cmd]="${DEPS[$cmd]}"  # dedupes by key
+    done
+    unset DEPS
+  fi
+done
+
+# Check which are missing
+MISSING=()
+for cmd in "${!ALL_DEPS[@]}"; do
+  command -v "$cmd" &>/dev/null || MISSING+=("$cmd")
+done
+```
+
+User is offered:
+- `y` = Install all missing with sudo
 - `n` = Skip (warn which utilities may not work)
 - `m` = Show manual installation commands
 
@@ -316,9 +358,24 @@ Install.sh sources `deps.sh` from each selected utility, aggregates missing deps
 
 | Type | Installation Method |
 |------|---------------------|
-| `alias` | Add `alias name="/path/to/main.sh"` to ~/.bash_aliases |
+| `alias` | Add `alias name="/path/to/main.sh"` to ~/.bashrc |
 | `source` | Add `source "/path/to/main.sh"` to ~/.bashrc |
 | Completions | Source the completions.sh file in ~/.bashrc |
+
+**Managed Block Approach:**
+
+All entries go in a single managed block in `~/.bashrc`:
+
+```bash
+# >>> unix_system_utilities >>>
+alias copy="/path/to/utilities/copy_via_osc52/main.sh"
+alias sshl="/path/to/utilities/ssh_port_forward/main.sh"
+source "/path/to/utilities/prompt/main.sh"
+source "/path/to/utilities/worktree_remove/completions.sh"
+# <<< unix_system_utilities <<<
+```
+
+This makes uninstall clean - remove the whole block and rewrite with remaining items.
 
 ### Uninstall Support
 
@@ -335,20 +392,21 @@ Does NOT uninstall dependencies (they may be used by other tools).
 
 ### Phase 2: Infrastructure
 4. Create `lib/common.sh` - colors, logging functions
-5. Create `lib/deps.sh` - aggregates deps from selected utilities, dedupes, offers install
 
 ### Phase 3: Script Migrations
-6. Migrate `utilities/worktree_add/`
-7. Migrate `utilities/worktree_remove/` with dynamic completions
-8. Migrate `utilities/prompt/` as sourced script
-9. Migrate `utilities/wsl_bridge/` with scheduled task setup
+5. Migrate `utilities/worktree_add/`
+6. Migrate `utilities/worktree_remove/` with dynamic completions
+7. Migrate `utilities/prompt/` as sourced script
+8. Migrate `utilities/wsl_bridge/` with scheduled task setup
+9. Migrate `utilities/tmux_config/`
 
 ### Phase 4: Enhanced Installer
 10. Rewrite `install.sh` with:
-    - Interactive selection UI
-    - Dependency installation with sudo handling
+    - Dependency aggregation and installation (with sudo handling)
     - Support for ALIASES, SOURCES, COMPLETIONS arrays
+    - Managed block in ~/.bashrc
     - Uninstall functionality
+    - Interactive selection UI (implement last, iterate with human feedback)
 
 ### Phase 5: Testing
 11. Add BATS tests for new utilities
@@ -368,7 +426,6 @@ Does NOT uninstall dependencies (they may be used by other tools).
 
 **Create:**
 - `lib/common.sh`
-- `lib/deps.sh` (aggregates and dedupes deps across utilities)
 - `utilities/ssh_port_forward/deps.sh`
 - `utilities/summarise_project/deps.sh`
 - `utilities/worktree_add/main.sh` (migrated + updated)

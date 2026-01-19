@@ -11,8 +11,7 @@ unix_system_utilities/
 ├── .agent/           # AI instructions, plans
 ├── install.sh        # Interactive installer
 ├── lib/
-│   ├── common.sh     # Shared functions (colors, logging)
-│   └── deps.sh       # Aggregates deps from utilities, dedupes
+│   └── common.sh     # Shared functions (colors, logging)
 └── utilities/
     └── <name>/
         ├── main.sh           # Entry point (aliased)
