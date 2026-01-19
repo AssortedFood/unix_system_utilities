@@ -415,7 +415,8 @@ do_install_all() {
   source "$RC"
 
   echo ""
-  echo "Run: ${BOLD}source ~/.bashrc${RESET}"
+  echo -n "source ~/.bashrc" | "$REPO_ROOT/utilities/copy_via_osc52/main.sh" 2>/dev/null
+  echo "Run: ${BOLD}source ~/.bashrc${RESET} (copied to clipboard)"
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -459,7 +460,8 @@ do_install_select() {
     echo "  - $name ($type)"
   done
   echo ""
-  echo "Run: ${BOLD}source ~/.bashrc${RESET}"
+  echo -n "source ~/.bashrc" | "$REPO_ROOT/utilities/copy_via_osc52/main.sh" 2>/dev/null
+  echo "Run: ${BOLD}source ~/.bashrc${RESET} (copied to clipboard)"
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
