@@ -2,5 +2,5 @@
 # Dependencies for tmux_config
 
 declare -A DEPS=(
-  [tmux]="sudo apt install tmux"
+  [tmux]="apt install tmux"
 )

@@ -2,7 +2,7 @@
 # Dependencies for summarise_project
 
 declare -A DEPS=(
-  [fdfind]="sudo apt install fd-find"
-  [tree]="sudo apt install tree"
-  [rg]="sudo apt install ripgrep"
+  [fdfind]="apt install fd-find"
+  [tree]="apt install tree"
+  [rg]="apt install ripgrep"
 )

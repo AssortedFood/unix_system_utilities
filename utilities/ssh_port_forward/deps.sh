@@ -2,5 +2,5 @@
 # Dependencies for ssh_port_forward
 
 declare -A DEPS=(
-  [jq]="sudo apt install jq"
+  [jq]="apt install jq"
 )

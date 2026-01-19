@@ -2,5 +2,5 @@
 # Dependencies for worktree_remove
 
 declare -A DEPS=(
-  [rg]="sudo apt install ripgrep"
+  [rg]="apt install ripgrep"
 )

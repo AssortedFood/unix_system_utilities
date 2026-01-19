@@ -2,6 +2,6 @@
 # Dependencies for wsl_bridge
 
 declare -A DEPS=(
-  [jq]="sudo apt install jq"
-  [rg]="sudo apt install ripgrep"
+  [jq]="apt install jq"
+  [rg]="apt install ripgrep"
 )

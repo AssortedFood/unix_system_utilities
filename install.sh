@@ -125,10 +125,14 @@ install_deps() {
 
   case "$choice" in
     [Yy])
+      # Use sudo only if not running as root
+      local sudo_prefix=""
+      [[ $EUID -ne 0 ]] && sudo_prefix="sudo "
+
       for cmd in $missing; do
         local install_cmd="${ALL_DEPS[$cmd]}"
         log_info "Installing $cmd..."
-        eval "$install_cmd" || log_warn "Failed to install $cmd"
+        eval "${sudo_prefix}${install_cmd}" || log_warn "Failed to install $cmd"
       done
       ;;
     [Mm])
