@@ -101,6 +101,22 @@ path_prompt() {
   fi
 }
 
+timer_prompt() {
+  local t=${timer_show:-0}
+  (( t <= 3 )) && return
+
+  local color
+  if (( t < 60 )); then
+    color="32"            # green — under 1m
+  elif (( t < 300 )); then
+    color="33"            # yellow — 1-5m
+  else
+    color="31"            # red — over 5m
+  fi
+
+  echo -e " \e[${color}m$(format_time $t)"
+}
+
 prompt_char_color() {
   if [[ -n "$VIRTUAL_ENV" ]]; then
     echo "37"  # white when in venv
@@ -109,4 +125,7 @@ prompt_char_color() {
   fi
 }
 
-PS1='$([ $? -ne 0 ] && echo "\[\e[31m\]! ")\[\e[38;5;245m\]$(path_prompt)\[\e[90m\]$([ \j -gt 0 ] && echo " [\j]")\[\e[0m\]\n\[\e[$(prompt_char_color)m\]❯\[\e[0m\] '
+trap '[[ -z "$COMP_LINE" ]] && timer_start=${timer_start:-$SECONDS}' DEBUG
+PROMPT_COMMAND='timer_show=$((SECONDS - ${timer_start:-$SECONDS})); unset timer_start'
+
+PS1='$([ $? -ne 0 ] && echo "\[\e[31m\]! ")\[\e[38;5;245m\]$(path_prompt)\[\e[90m\]$([ \j -gt 0 ] && echo " [\j]")$(timer_prompt)\[\e[0m\]\n\[\e[$(prompt_char_color)m\]❯\[\e[0m\] '
