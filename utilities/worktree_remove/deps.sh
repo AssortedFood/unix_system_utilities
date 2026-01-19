@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Dependencies for wsl_bridge
+# Dependencies for worktree_remove
 
 declare -A DEPS=(
-  [jq]="sudo apt install jq"
   [rg]="sudo apt install ripgrep"
 )

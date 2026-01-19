@@ -9,7 +9,7 @@ parse_suggestions() {
   # Filter input lines matching suggestion pattern
   local regex='^[[:space:]]*[0-9]+\)'
   # Read matching lines into array for further parsing
-  mapfile -t SUGGESTION_LINES < <(grep -E "$regex" || true)
+  mapfile -t SUGGESTION_LINES < <(rg "$regex" || true)
   # Extract suggestion indices into IDX array
   IDX=()
   for line in "${SUGGESTION_LINES[@]}"; do
@@ -34,7 +34,7 @@ parse_suggestions() {
   PKG=()
   for line in "${SUGGESTION_LINES[@]}"; do
     local pkg_raw pkg
-    if echo "$line" | grep -qE 'in package'; then
+    if echo "$line" | rg -q 'in package'; then
       # Capture package name after 'in package'
       pkg_raw=$(echo "$line" | sed -E 's/.*in package[[:space:]]*([^ ]+).*/\1/')
     else

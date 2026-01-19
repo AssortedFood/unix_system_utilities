@@ -267,7 +267,7 @@ install_to_bashrc() {
   new_block=$(get_managed_block)
 
   # Remove old managed block if exists
-  if grep -q "$MANAGED_START" "$RC" 2>/dev/null; then
+  if rg -q "$MANAGED_START" "$RC" 2>/dev/null; then
     # Create temp file without managed block
     local tmp
     tmp=$(mktemp)
@@ -342,7 +342,7 @@ do_install() {
 # ──────────────────────────────────────────────────────────────────────────────
 
 do_uninstall() {
-  if grep -q "$MANAGED_START" "$RC" 2>/dev/null; then
+  if rg -q "$MANAGED_START" "$RC" 2>/dev/null; then
     local tmp
     tmp=$(mktemp)
     awk -v start="$MANAGED_START" -v end="$MANAGED_END" '

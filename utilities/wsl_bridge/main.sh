@@ -31,7 +31,7 @@ EOF
 }
 
 check_wsl() {
-    if ! grep -qi Microsoft /proc/version 2>/dev/null; then
+    if ! rg -qi Microsoft /proc/version 2>/dev/null; then
         echo "Error: This utility only works in WSL"
         exit 1
     fi

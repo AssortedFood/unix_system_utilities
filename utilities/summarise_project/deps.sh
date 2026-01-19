@@ -4,4 +4,5 @@
 declare -A DEPS=(
   [fdfind]="sudo apt install fd-find"
   [tree]="sudo apt install tree"
+  [rg]="sudo apt install ripgrep"
 )

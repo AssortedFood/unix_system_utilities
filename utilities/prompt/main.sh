@@ -20,7 +20,7 @@ git_status_color() {
   local status=$(git status --porcelain 2>/dev/null)
 
   if [[ -n "$status" ]]; then
-    if echo "$status" | grep -q '^.\?[MD]'; then
+    if echo "$status" | rg -q '^.?[MD]'; then
       echo "33"  # yellow — modified
     else
       echo "32"  # green — untracked only

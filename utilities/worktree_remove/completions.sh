@@ -7,7 +7,7 @@ _rwt_completions() {
 
   local branches
   branches=$(git -C "$repo_root" worktree list --porcelain 2>/dev/null \
-    | grep "^branch" \
+    | rg "^branch" \
     | sed 's|branch refs/heads/||')
 
   COMPREPLY=( $(compgen -W "$branches" -- "${COMP_WORDS[1]}") )

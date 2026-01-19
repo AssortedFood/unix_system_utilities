@@ -23,7 +23,7 @@ echo "📝 Output will be saved to: $OUTPUT_FILE"
 
 # 3. Build ignore pattern for tree from the script‑dir .summaryignore
 if [[ -f $IGNORE_FILE ]]; then
-    TREE_IGNORES=$(grep -vE '^\s*(#|$)' "$IGNORE_FILE" \
+    TREE_IGNORES=$(rg -v '^\s*(#|$)' "$IGNORE_FILE" \
                    | sed 's:/*$::' \
                    | paste -sd '|' -)
 else

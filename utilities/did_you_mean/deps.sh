@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Dependencies for wsl_bridge
+# Dependencies for did_you_mean
 
 declare -A DEPS=(
-  [jq]="sudo apt install jq"
   [rg]="sudo apt install ripgrep"
 )
