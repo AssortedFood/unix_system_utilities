@@ -2,5 +2,5 @@
 # Dependencies for did_you_mean
 
 declare -A DEPS=(
-  [rg]="apt install ripgrep"
+  [rg]="apt install -y ripgrep"
 )

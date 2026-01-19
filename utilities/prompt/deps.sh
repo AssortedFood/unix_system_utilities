@@ -2,5 +2,5 @@
 # Dependencies for prompt
 
 declare -A DEPS=(
-  [rg]="apt install ripgrep"
+  [rg]="apt install -y ripgrep"
 )
