@@ -313,6 +313,11 @@ do_install() {
   # Source bashrc to activate aliases in this shell
   source "$RC"
 
+  # Reload tmux config if tmux is running
+  if [[ -n "${TMUX:-}" ]]; then
+    tmux source-file ~/.tmux.conf 2>/dev/null && log_info "Reloaded tmux config"
+  fi
+
   echo ""
   log_success "Installation complete!"
   echo ""
@@ -322,7 +327,14 @@ do_install() {
     echo "  - $name ($type)"
   done
   echo ""
-  printf "Run %bsource ~/.bashrc%b to activate.\n" "${BLUE}" "${RESET}"
+
+  # Copy activation command to clipboard
+  local tmp_clip
+  tmp_clip=$(mktemp)
+  echo "source ~/.bashrc" > "$tmp_clip"
+  "$REPO_ROOT/utilities/copy_via_osc52/main.sh" "$tmp_clip" 2>/dev/null && \
+    log_info "Copied 'source ~/.bashrc' to clipboard - paste to activate"
+  rm -f "$tmp_clip"
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
