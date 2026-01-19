@@ -313,8 +313,8 @@ do_install() {
   # Source bashrc to activate aliases in this shell
   source "$RC"
 
-  # Reload tmux config if tmux is running
-  if [[ -n "${TMUX:-}" ]]; then
+  # Reload tmux config if tmux is running and config exists
+  if [[ -n "${TMUX:-}" && -f "$HOME/.tmux.conf" ]]; then
     tmux source-file ~/.tmux.conf 2>/dev/null && log_info "Reloaded tmux config"
   fi
 
@@ -352,6 +352,18 @@ do_uninstall() {
     ' "$RC" > "$tmp"
     mv "$tmp" "$RC"
     log_success "Removed all unix_system_utilities from ~/.bashrc"
+
+    # Reset prompt to default
+    PS1='\u@\h:\w\$ '
+
+    # Unalias installed commands
+    for entry in "${ALIASES[@]}"; do
+      IFS=: read -r name _ <<< "$entry"
+      unalias "$name" 2>/dev/null || true
+    done
+
+    echo ""
+    log_info "Open a new terminal for changes to fully take effect"
   else
     log_info "Nothing to uninstall"
   fi
