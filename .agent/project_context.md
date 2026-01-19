@@ -51,6 +51,15 @@ unix_system_utilities/
         └── .tmux.conf
 ```
 
+## Active Plan
+
+**Plan file:** `.agent/plans/02-lightweight-installer.md`
+
+Goal: Improve install.sh UX while keeping it dependency-free. Key changes:
+- Default to install-all (no interactive prompts)
+- Add `--select` for interactive mode
+- Auto-install deps with `-y` (single sudo prompt)
+
 ## Completed Work
 
 **Plan file:** `.agent/plans/01-restructuring.md` - **COMPLETED**

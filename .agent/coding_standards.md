@@ -25,7 +25,9 @@ IFS=$'\n\t'
 If utility has required deps, create `deps.sh`:
 ```bash
 declare -A DEPS=(
-  [fd]="sudo apt install fd-find"
-  [tree]="sudo apt install tree"
+  [fd]="apt install -y fd-find"
+  [tree]="apt install -y tree"
 )
 ```
+
+Note: Don't include `sudo` - the installer handles elevation.
