@@ -14,8 +14,7 @@ Personal collection of shell utilities.
 ```bash
 git clone https://github.com/AssortedFood/unix_system_utilities.git
 cd unix_system_utilities
-chmod +x install.sh
-sudo ./install.sh
+./install.sh
 ```
 
 ## Utilities
@@ -27,6 +26,7 @@ sudo ./install.sh
 | `sshl` | SSH with port forwarding profiles |
 | `awt` | Create git worktree with setup |
 | `rwt` | Remove git worktree safely |
+| `prompt` | Custom bash prompt with git integration (sourced) |
 | `dm` | Termux "did you mean" command correction |
 | `wsl-bridge` | WSL2 port forwarding to Windows |
 | `tmux-setup` | Install tmux and symlink config |
