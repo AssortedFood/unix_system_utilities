@@ -317,10 +317,15 @@ do_install() {
   # Source bashrc to activate aliases in this shell
   source "$RC"
 
-  # Reload tmux config if tmux is running and config exists
-  if [[ -n "${TMUX:-}" && -f "$HOME/.tmux.conf" ]]; then
-    tmux source-file ~/.tmux.conf 2>/dev/null && log_info "Reloaded tmux config"
-  fi
+  # Run tmux-setup if selected (installs tmux and copies config)
+  for item in "${SELECTED_ITEMS[@]}"; do
+    IFS=: read -r type name path <<< "$item"
+    if [[ "$name" == "tmux-setup" ]]; then
+      echo ""
+      log_info "Running tmux-setup..."
+      "$REPO_ROOT/$path"
+    fi
+  done
 
   echo ""
   log_success "Installation complete!"
