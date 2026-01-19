@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Unix System Utilities - Interactive Installer
+# Unix System Utilities - Installer
 # ──────────────────────────────────────────────────────────────────────────────
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -60,6 +60,15 @@ matches_platform() {
   esac
 }
 
+platform_label() {
+  local platform="$1"
+  case "$platform" in
+    wsl) echo "WSL only" ;;
+    termux) echo "Termux only" ;;
+    *) echo "" ;;
+  esac
+}
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Utility Functions
 # ──────────────────────────────────────────────────────────────────────────────
@@ -113,58 +122,48 @@ install_deps() {
   [[ -z "$missing" ]] && return 0
 
   echo ""
-  log_warn "Missing dependencies: $missing"
-  echo ""
-  echo "Options:"
-  echo "  y - Install all missing dependencies (requires sudo)"
-  echo "  n - Skip (some utilities may not work)"
-  echo "  m - Show manual installation commands"
-  echo ""
-  read -p "Install missing dependencies? [y/n/m] " -n 1 -r choice
-  echo ""
+  echo "Installing dependencies..."
 
-  case "$choice" in
-    [Yy])
-      # Use sudo only if not running as root
-      local sudo_prefix=""
-      [[ $EUID -ne 0 ]] && sudo_prefix="sudo "
+  # Use sudo only if not running as root
+  local sudo_prefix=""
+  if [[ $EUID -ne 0 ]]; then
+    sudo_prefix="sudo "
+    # Validate sudo once upfront
+    sudo -v || { log_error "sudo required for dependency installation"; return 1; }
+  fi
 
-      for cmd in $missing; do
-        local install_cmd="${ALL_DEPS[$cmd]}"
-        log_info "Installing $cmd..."
-        eval "${sudo_prefix}${install_cmd}" || log_warn "Failed to install $cmd"
-      done
-      ;;
-    [Mm])
-      echo ""
-      echo "Manual installation commands:"
-      for cmd in $missing; do
-        echo "  ${ALL_DEPS[$cmd]}"
-      done
-      echo ""
-      ;;
-    *)
-      log_info "Skipping dependency installation"
-      ;;
-  esac
+  for cmd in $missing; do
+    local install_cmd="${ALL_DEPS[$cmd]}"
+    if eval "${sudo_prefix}${install_cmd}" &>/dev/null; then
+      echo "  ${GREEN}✓${RESET} $cmd"
+    else
+      echo "  ${RED}✗${RESET} $cmd (failed)"
+    fi
+  done
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Interactive Selection
+# Build Available Lists
 # ──────────────────────────────────────────────────────────────────────────────
 
 declare -a AVAILABLE_ALIASES=()
 declare -a AVAILABLE_SOURCES=()
+declare -a SKIPPED_ALIASES=()
 declare -a SELECTED_ITEMS=()
 
 build_available_list() {
   AVAILABLE_ALIASES=()
   AVAILABLE_SOURCES=()
+  SKIPPED_ALIASES=()
 
   for entry in "${ALIASES[@]}"; do
     IFS=: read -r name path desc platform <<< "$entry"
     if matches_platform "$platform"; then
       AVAILABLE_ALIASES+=("$name:$path:$desc")
+    else
+      local plabel
+      plabel=$(platform_label "$platform")
+      SKIPPED_ALIASES+=("$name:$desc:$plabel")
     fi
   done
 
@@ -175,6 +174,10 @@ build_available_list() {
     fi
   done
 }
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Interactive Selection (--select)
+# ──────────────────────────────────────────────────────────────────────────────
 
 show_selection_menu() {
   echo ""
@@ -226,6 +229,22 @@ show_selection_menu() {
     log_warn "No utilities selected"
     exit 0
   fi
+}
+
+select_all() {
+  SELECTED_ITEMS=()
+
+  for entry in "${AVAILABLE_ALIASES[@]}"; do
+    IFS=: read -r name path desc <<< "$entry"
+    SELECTED_ITEMS+=("alias:$name:$path")
+  done
+
+  for entry in "${AVAILABLE_SOURCES[@]}"; do
+    IFS=: read -r path desc <<< "$entry"
+    local name
+    name=$(basename "$(dirname "$path")")
+    SELECTED_ITEMS+=("source:$name:$path")
+  done
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -292,7 +311,118 @@ install_to_bashrc() {
   } >> "$RC"
 }
 
-do_install() {
+setup_tmux_config() {
+  # Copy tmux config if tmux-setup is selected (tmux itself is installed via deps.sh)
+  for item in "${SELECTED_ITEMS[@]}"; do
+    IFS=: read -r type name path <<< "$item"
+    if [[ "$name" == "tmux-setup" ]]; then
+      local src="$REPO_ROOT/utilities/tmux_config/.tmux.conf"
+      local dst="$HOME/.tmux.conf"
+
+      # Backup existing config if present
+      if [[ -f "$dst" ]]; then
+        local backup="$dst.backup.$(date +%Y%m%d%H%M%S)"
+        mv "$dst" "$backup"
+        echo "  ${YELLOW}!${RESET} Backed up existing ~/.tmux.conf"
+      fi
+
+      cp "$src" "$dst"
+      echo "  ${GREEN}✓${RESET} tmux config"
+
+      # Reload if running inside tmux
+      if [[ -n "${TMUX:-}" ]]; then
+        tmux source-file "$dst" 2>/dev/null || true
+      fi
+      return
+    fi
+  done
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Install All (default)
+# ──────────────────────────────────────────────────────────────────────────────
+
+do_install_all() {
+  build_available_list
+  select_all
+
+  echo ""
+  echo "${BOLD}Unix System Utilities${RESET}"
+  echo "────────────────────────────────────"
+  echo ""
+  echo "Installing:"
+  for item in "${SELECTED_ITEMS[@]}"; do
+    IFS=: read -r type name path <<< "$item"
+    # Get description from original entry
+    local desc=""
+    if [[ "$type" == "alias" ]]; then
+      for entry in "${AVAILABLE_ALIASES[@]}"; do
+        IFS=: read -r ename epath edesc <<< "$entry"
+        if [[ "$ename" == "$name" ]]; then
+          desc="$edesc"
+          break
+        fi
+      done
+    else
+      for entry in "${AVAILABLE_SOURCES[@]}"; do
+        IFS=: read -r epath edesc <<< "$entry"
+        local ename
+        ename=$(basename "$(dirname "$epath")")
+        if [[ "$ename" == "$name" ]]; then
+          desc="$edesc (sourced)"
+          break
+        fi
+      done
+    fi
+    printf "  %-12s - %s\n" "$name" "$desc"
+  done
+
+  # Show skipped utilities
+  if [[ ${#SKIPPED_ALIASES[@]} -gt 0 ]]; then
+    echo ""
+    echo "Skipped (platform-specific):"
+    for entry in "${SKIPPED_ALIASES[@]}"; do
+      IFS=: read -r name desc plabel <<< "$entry"
+      printf "  %-12s - %s\n" "$name" "$plabel"
+    done
+  fi
+
+  # Collect utility directories for dependency check
+  local -a util_dirs=()
+  for item in "${SELECTED_ITEMS[@]}"; do
+    IFS=: read -r type name path <<< "$item"
+    util_dirs+=("$(get_util_dir "$path")")
+  done
+
+  # Check and install dependencies
+  aggregate_deps "${util_dirs[@]}"
+  local missing
+  missing=$(check_missing_deps)
+  if [[ -n "$missing" ]]; then
+    install_deps "$missing"
+  fi
+
+  # Setup tmux config if selected (tmux installed via deps)
+  setup_tmux_config
+
+  # Install to bashrc
+  echo ""
+  echo "Writing to ~/.bashrc..."
+  install_to_bashrc
+  echo "  ${GREEN}✓${RESET} Done"
+
+  # Source bashrc to activate aliases in this shell
+  source "$RC"
+
+  echo ""
+  echo "Run: ${BOLD}source ~/.bashrc${RESET}"
+}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Install with Selection (--select)
+# ──────────────────────────────────────────────────────────────────────────────
+
+do_install_select() {
   build_available_list
   show_selection_menu
 
@@ -311,21 +441,14 @@ do_install() {
     install_deps "$missing"
   fi
 
+  # Setup tmux config if selected (tmux installed via deps)
+  setup_tmux_config
+
   # Install to bashrc
   install_to_bashrc
 
   # Source bashrc to activate aliases in this shell
   source "$RC"
-
-  # Run tmux-setup if selected (installs tmux and copies config)
-  for item in "${SELECTED_ITEMS[@]}"; do
-    IFS=: read -r type name path <<< "$item"
-    if [[ "$name" == "tmux-setup" ]]; then
-      echo ""
-      log_info "Running tmux-setup..."
-      "$REPO_ROOT/$path"
-    fi
-  done
 
   echo ""
   log_success "Installation complete!"
@@ -336,14 +459,38 @@ do_install() {
     echo "  - $name ($type)"
   done
   echo ""
+  echo "Run: ${BOLD}source ~/.bashrc${RESET}"
+}
 
-  # Copy activation command to clipboard
-  local tmp_clip
-  tmp_clip=$(mktemp)
-  echo "source ~/.bashrc" > "$tmp_clip"
-  "$REPO_ROOT/utilities/copy_via_osc52/main.sh" "$tmp_clip" 2>/dev/null && \
-    log_info "Copied 'source ~/.bashrc' to clipboard - paste to activate"
-  rm -f "$tmp_clip"
+# ──────────────────────────────────────────────────────────────────────────────
+# List Utilities (--list)
+# ──────────────────────────────────────────────────────────────────────────────
+
+do_list() {
+  echo ""
+  echo "${BOLD}Available Utilities${RESET}"
+  echo ""
+  printf "  %-12s  %-40s  %s\n" "Alias" "Description" "Platform"
+  echo "  ────────────  ────────────────────────────────────────  ────────────"
+
+  for entry in "${ALIASES[@]}"; do
+    IFS=: read -r name path desc platform <<< "$entry"
+    local plabel
+    plabel=$(platform_label "$platform")
+    [[ -z "$plabel" ]] && plabel="all"
+    printf "  %-12s  %-40s  %s\n" "$name" "$desc" "$plabel"
+  done
+
+  for entry in "${SOURCES[@]}"; do
+    IFS=: read -r path desc platform <<< "$entry"
+    local name
+    name=$(basename "$(dirname "$path")")
+    local plabel
+    plabel=$(platform_label "$platform")
+    [[ -z "$plabel" ]] && plabel="all"
+    printf "  %-12s  %-40s  %s\n" "$name" "$desc (sourced)" "$plabel"
+  done
+  echo ""
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -379,7 +526,7 @@ do_uninstall() {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Main
+# Help
 # ──────────────────────────────────────────────────────────────────────────────
 
 show_help() {
@@ -387,15 +534,25 @@ show_help() {
 Unix System Utilities Installer
 
 Usage:
-  ./install.sh              Interactive installation
-  ./install.sh --uninstall  Remove all utilities from ~/.bashrc
+  ./install.sh              Install all compatible utilities + deps
+  ./install.sh --select     Interactive numbered selection
+  ./install.sh --list       Show available utilities table
+  ./install.sh --uninstall  Remove from ~/.bashrc
   ./install.sh --help       Show this help
-
-To change your selection, run --uninstall then re-run the installer.
 EOF
 }
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Main
+# ──────────────────────────────────────────────────────────────────────────────
+
 case "${1:-}" in
+  --select)
+    do_install_select
+    ;;
+  --list)
+    do_list
+    ;;
   --uninstall)
     do_uninstall
     ;;
@@ -403,6 +560,6 @@ case "${1:-}" in
     show_help
     ;;
   *)
-    do_install
+    do_install_all
     ;;
 esac

@@ -53,12 +53,18 @@ unix_system_utilities/
 
 ## Active Plan
 
-**Plan file:** `.agent/plans/02-lightweight-installer.md`
+None - all planned work complete.
 
-Goal: Improve install.sh UX while keeping it dependency-free. Key changes:
-- Default to install-all (no interactive prompts)
-- Add `--select` for interactive mode
-- Auto-install deps with `-y` (single sudo prompt)
+## Recently Completed
+
+**Plan file:** `.agent/plans/02-lightweight-installer.md` - **COMPLETED**
+
+Improved install.sh UX while keeping it dependency-free:
+- Default now installs all compatible utilities (no interactive prompts)
+- Added `--select` for interactive mode
+- Added `--list` to show utilities table
+- Auto-installs deps with `-y` (single sudo prompt, ✓/✗ status)
+- Removed clipboard copy at end
 
 ## Completed Work
 
@@ -82,7 +88,9 @@ Goal: Improve install.sh UX while keeping it dependency-free. Key changes:
 ```
 install.sh sources lib/common.sh
          ↓
-Interactive selection → aggregate deps.sh files → dedupe → offer install → install to ~/.bashrc managed block
+Default: install-all → aggregate deps.sh → auto-install missing → write to ~/.bashrc managed block
+         ↓
+--select: interactive selection → same flow as above
 ```
 
 Script types:
@@ -96,6 +104,15 @@ Platform-specific (only shown in installer on matching platform):
 
 ## Install Configuration
 
+**CLI options:**
+| Command | Behavior |
+|---------|----------|
+| `./install.sh` | Install all compatible utilities + deps |
+| `./install.sh --select` | Interactive numbered selection |
+| `./install.sh --list` | Show available utilities table |
+| `./install.sh --uninstall` | Remove from ~/.bashrc |
+| `./install.sh --help` | Show help |
+
 The installer uses a managed block in ~/.bashrc:
 ```bash
 # >>> unix_system_utilities >>>
@@ -103,5 +120,3 @@ alias copy="/path/to/utilities/copy_via_osc52/main.sh"
 source "/path/to/utilities/prompt/main.sh"
 # <<< unix_system_utilities <<<
 ```
-
-Run `./install.sh --uninstall` to cleanly remove all entries.
